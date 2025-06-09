@@ -15,7 +15,7 @@
                 emit-value
                 option-label="label"
                 option-value="value"
-                label="Department"
+                label="Business Unit"
                 @update:model-value="filterRowsByDepartment"
               >
                 <template v-if="filterByDepartment" v-slot:append>
@@ -277,7 +277,18 @@ const formatDisplay = (value, type) => {
 
 // Export to Excel
 const exportToExcel = () => {
-  const plainRows = rows.value.map((row) => ({ ...row }))
+  //Filter 'Actions' column from rows
+  const filteredColumns = columns.value.filter((col) => col?.name !== 'actions')
+  const filteredRows = rows.value.map((row) => {
+    const newRow = {}
+    filteredColumns.forEach((col) => {
+      newRow[col?.name] = row[col?.name]
+    })
+    return newRow
+  })
+  // const plainRows = rows.value.map((row) => ({ ...row }))
+  const plainRows = filteredRows
+
   const worksheet = XLSX.utils.json_to_sheet(plainRows)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Dados')
