@@ -300,11 +300,7 @@ const filterRowsByDepartment = async () => {
     return
   }
 
-  console.log('Filtering rows by department:', filterByDepartment.value)
-
   const filteredRows = rows.value.filter((row) => {
-    console.log('Checking row:', row);
-    
     return row?.department === filterByDepartment.value
   })
 
