@@ -1,0 +1,80 @@
+# version: '3.8'
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongo_instance
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo_data:/data/db
+    networks:
+      - app-network
+
+  backend:
+    depends_on:
+      - mongodb
+    build: ./backend
+    container_name: sandbox_backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/backend
+      - /backend/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend
+    container_name: sandbox_frontend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  pdf-conversion:
+    build: ./pdf-service
+    container_name: pdf_conversion_service
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./pdf-service:/usr/src/app
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  face-comparison:
+    build: ./face-recognition
+    container_name: face_comparison_service
+    ports:
+      - "5500:5500"
+    volumes:
+      - ./face_recognition:/app
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - app-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
+
+# volumes:
+#   mongo_data:
