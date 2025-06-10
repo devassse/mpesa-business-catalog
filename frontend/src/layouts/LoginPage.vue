@@ -12,12 +12,12 @@
             <q-tab-panel name="login">
               <div class="text-h6 q-mt-xl">Login to M-Pesa Business <br/> Catalog</div>
               <div class="text-caption q-pb-lg">It Makes working fun!</div>
-              <LoginPage />
+              <LoginPage @sign-up-tab="tab = $event"/>
             </q-tab-panel>
             <q-tab-panel name="register">
               <div class="text-h6">Signup to M-Pesa Business <br/> Catalog</div>
               <div class="text-caption q-pb-lg">Join us on this journey of improving our work place</div>
-              <SignupPage />
+              <SignupPage @sign-in-tab="tab = $event"/>
             </q-tab-panel>
           </q-tab-panels>
         </q-card-section>

@@ -98,7 +98,7 @@ const getCurrentUser = async (authToken) => {
 
     //Save User information on session storage
     sessionStorage.setItem('currentUser', JSON.stringify(response.data));
-    
+
     return response.data;
   } catch (error) {
     console.error('Error fetching current user:', error.response ? error.response.data : error.message);
@@ -106,10 +106,30 @@ const getCurrentUser = async (authToken) => {
   }
 };
 
+const forgotPassword = async (email) => {
+  try {
+    const response = await apiClient.post('/auth/forgot-password', { email });
+    return response.data;
+  } catch (error) {
+    console.error('Error during password reset:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+}
+
+const resetPassword = async (params) => {
+  try {
+    const response = await apiClient.post('/auth/reset-password', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error during password reset:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+}
+
 import { boot } from 'quasar/wrappers';
 
 export default boot(({ app }) => {
-  app.config.globalProperties.$auth = { signup, login, getCurrentUser };
+  app.config.globalProperties.$auth = { signup, login, getCurrentUser, forgotPassword, resetPassword };
 });
 
-export { signup, login, getCurrentUser };
+export { signup, login, getCurrentUser, forgotPassword, resetPassword };

@@ -24,16 +24,23 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE)
   })
 
-  Router.beforeEach(async (to, from, next) => {
-    const token = await getCookie('authToken')
-    if (!token && to.path !== '/login') {
-      next('/login')
-    } else if (token && to.path === '/login') {
-      next('/')  // Redirect to home if user is already authenticated
-    } else {
-      next()
-    }
-  })
+  // Global navigation guard to check authentication
+  // This will redirect users to the login page if they are not authenticated
+  // and prevent access to protected routes
+  Router.beforeEach((to, from, next) => {
+  const token = Cookies.get('authToken')
+
+  const publicPages = ['/login', '/forgot-password', '/reset-password','/reset-password/:token']
+  const authRequired = !publicPages.includes(to.path)
+
+  if (authRequired && !token) {
+    next('/login')
+  } else if (token && to.path === '/login') {
+    next('/')
+  } else {
+    next()
+  }
+})
 
   return Router
 })

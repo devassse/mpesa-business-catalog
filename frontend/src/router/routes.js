@@ -44,6 +44,18 @@ const routes = [
     path: '/login',
     component: () => import('layouts/LoginPage.vue')
   },
+  {
+    path: '/forgot-password',
+    component: () => import('layouts/ForgotPassword.vue'),
+  },
+  {
+    path: '/reset-password',
+    component: () => import('layouts/ResetPassword.vue'),
+  },
+  {
+    path: '/reset-password/:token',
+    component: () => import('layouts/ResetPassword.vue'),
+  },
   { path: "/edit_document/:id", component: () => import('src/pages/DocSign/EditDocument.vue'),
     children: [
       {path: "", component: () => import('components/signDoc/editDoc/RightSidebar.vue')},
