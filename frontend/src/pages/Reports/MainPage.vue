@@ -406,8 +406,9 @@ const canView = () => {
     return false;
   }
 }
+
+// If the user is only viewer, they can edit the report
 const canEdit = () => {
-  // se for viewer e editor, retorna false:
   if (isViewer.value && isEditor.value) {
     return false;
   } else if (isViewer.value && !isEditor.value) {
