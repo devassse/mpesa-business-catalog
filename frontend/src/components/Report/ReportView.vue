@@ -1,30 +1,20 @@
 <template>
   <!-- Report Table -->
   <div>
-    <q-table
-      flat
-      square
-      :rows="rows"
-      :columns="columns"
-      bordered
-      virtual-scroll
-      :rows-per-page-options="[15, 25, 0]"
-      row-key="id"
-      class="sticky-header-table"
-      :loading="!rows.length"
-    >
+    <q-table flat square :rows="rows" :columns="columns" bordered virtual-scroll :rows-per-page-options="[15, 25, 0]"
+      row-key="id" class="sticky-header-table" :loading="loadingReportRows" :filter="filter">
+      <!-- Search -->
+      <template v-slot:top-right>
+        <q-input dense debounce="300" v-model="filter" placeholder="Search" input-class="search-options">
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </template>
+      <!--/ End Search-->
       <template v-slot:body-cell-actions="props">
         <q-td :props="props">
-          <q-btn
-            disable
-            size="sm"
-            icon="delete"
-            color="negative"
-            flat
-            round
-            dense
-            @click="removerLinha(props.row)"
-          />
+          <q-btn disable size="sm" icon="delete" color="negative" flat round dense @click="removerLinha(props.row)" />
         </q-td>
       </template>
     </q-table>
@@ -42,6 +32,9 @@ const reportMonth = ref('')
 
 const columns = ref([])
 const rows = ref([])
+
+const filter = ref('')
+const loadingReportRows = ref(false)
 
 const emit = defineEmits(['reportNameToParent'])
 
@@ -78,6 +71,15 @@ onMounted(async () => {
 })
 </script>
 <style lang="sass">
+.search-options
+  width: 300px !important;
+  max-width: 100% !important;
+  min-width: 200px !important;
+  color: #fff !important;
+  &::placeholder
+    color: #fff !important
+    opacity: 1 !important
+
 .sticky-header-table
   .q-table__top,
   thead tr:first-child th /* bg color is important for th; just specify one */

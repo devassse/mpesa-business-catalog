@@ -251,6 +251,10 @@ const handleFileUpload = (file) => {
     const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
     excelData.value = json
 
+
+    console.log('Excel Data:', excelData.value)
+
+
     // Check for empty columns and handle them
     const checkEmptyColumns = (columns, rows) => {
       const emptyColumns = []
@@ -275,7 +279,7 @@ const handleFileUpload = (file) => {
 
     // Building Table Headers
     importedFileColumns.value = json[0].map((col, index) => ({
-      id: idCounter++,
+      // id: idCounter++,
       name: String(col).toLowerCase(), // OLD Approach col?.toLowerCase(),
       label: capitalize(col),
       field: String(col).toLowerCase(),
@@ -320,7 +324,7 @@ const handleFileUpload = (file) => {
           rowData[col.field] = rowData[col.field] || 'Open'
         }
       })
-      return { id: index + 1, ...rowData }
+      return { id: index, ...rowData }
     })
   }
   reader.readAsArrayBuffer(file)

@@ -4,13 +4,13 @@
     <q-expansion-item dense dense-toggle expand-separator icon="search" label="Filters">
       <q-card>
         <q-card-section>
-          <div class="row">
-            <div class="col-3">
-              <q-select flat dense v-model="filterByDepartment" :options="deptSelectOptions" map-options emit-value
-                option-label="label" option-value="value" label="Business Unit"
+          <div class="row q-col-gutter-md">
+            <div class="col-3" v-for="col in columns" :key="col.name">
+              <q-select flat dense v-model="col.filter" :options="col?.options" map-options emit-value
+                option-label="label" option-value="value" :label="col?.label"
                 @update:model-value="filterRowsByDepartment">
-                <template v-if="filterByDepartment" v-slot:append>
-                  <q-icon name="cancel" @click.stop.prevent="clearDepartmentFilter" class="cursor-pointer" />
+                <template v-if="col?.filter" v-slot:append>
+                  <q-icon name="cancel" @click.stop.prevent="col.filter = ''" class="cursor-pointer" />
                 </template>
               </q-select>
             </div>
@@ -22,7 +22,16 @@
   <!-- End Filters -->
   <!-- Report Table -->
   <q-table flat square :rows="rows" :columns="columns" row-key="id" bordered virtual-scroll
-    :rows-per-page-options="[15, 25, 0]" class="sticky-header-table" :loading="loadingReportRows">
+    :rows-per-page-options="[15, 25, 0]" class="sticky-header-table" :loading="loadingReportRows" :filter="filter">
+    <!-- Search -->
+    <template v-slot:top-right>
+      <q-input dense debounce="300" v-model="filter" placeholder="Search" input-class="search-options">
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
+      </q-input>
+    </template>
+    <!--/ End Search-->
     <!-- Generic Slot for All Cells with Q-EDIT-POPUP -->
     <template v-slot:body-cell="props">
       <q-td :props="props">
@@ -88,6 +97,7 @@ const reportMonth = ref('')
 const columns = ref([])
 const rows = ref([])
 
+const filter = ref('')
 const filterByDepartment = ref('')
 const loadingReportRows = ref(false)
 
@@ -421,6 +431,16 @@ defineExpose({
 })
 </script>
 <style lang="sass">
+.search-options
+  width: 300px !important;
+  max-width: 100% !important;
+  min-width: 200px !important;
+  color: #fff !important;
+  &::placeholder
+    color: #fff !important
+    opacity: 1 !important
+
+
 .q-table tbody td
   max-width: 500px !important;
   white-space: normal !important;
