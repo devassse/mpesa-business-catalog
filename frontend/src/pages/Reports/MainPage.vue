@@ -2,11 +2,8 @@
   <div class="bg-dark">
     <q-card class="bg-dark q-pt-lg" style="border: 0" flat>
       <div class="image-avatar-1 bg-secondary" style="border-radius: 100%">
-        <img
-          :src="images.business"
-          class="appearBox"
-          style="position: absolute; object-position: fit; height: 90%; width: 90%; right: 5px"
-        />
+        <img :src="images.business" class="appearBox"
+          style="position: absolute; object-position: fit; height: 90%; width: 90%; right: 5px" />
       </div>
 
       <q-card-section class="text-center q-pt-sm text-white appearBox">
@@ -15,38 +12,13 @@
     </q-card>
   </div>
   <!-- The Table -->
-  <q-table
-    title="Reports"
-    dense
-    flat
-    bordered
-    square
-    :rows="rows"
-    :columns="columns"
-    row-key="reportname"
-    selection="single"
-    :filter="filter"
-    :loading="loadingReports"
-    :rows-per-page-options="[15]"
-  >
+  <q-table title="Reports" dense flat bordered square :rows="rows" :columns="columns" row-key="reportname"
+    selection="single" :filter="filter" :loading="loadingReports" :rows-per-page-options="[15]">
     <template v-slot:top>
-      <q-btn
-        color="secondary"
-        label="Create new Report"
-        no-caps
-        icon="add_chart"
-        to="/reports/createreport"
-        :disable="!isAdmin"
-      />
+      <q-btn color="secondary" label="Create new Report" no-caps icon="add_chart" to="/reports/createreport"
+        :disable="!isAdmin" />
       <q-space />
-      <q-input
-        dense
-        debounce="300"
-        color="secondary"
-        label="Search Reports"
-        v-model="filter"
-        style="width: 300px"
-      >
+      <q-input dense debounce="300" color="secondary" label="Search Reports" v-model="filter" style="width: 300px">
         <template v-slot:append>
           <q-icon name="search" />
         </template>
@@ -56,55 +28,35 @@
     <template v-slot:body="props">
       <q-tr :props="props">
         <q-td auto-width>
-          <q-toggle
-            :disable="!isAdmin"
-            color="secondary"
-            checked-icon="add"
-            unchecked-icon="remove"
+          <q-toggle :disable="!isAdmin" color="secondary" checked-icon="add" unchecked-icon="remove"
             :model-value="expandedRow === props.row.id"
-            @update:model-value="(checked) => checkReportRow(props.row, checked)"
-          />
+            @update:model-value="(checked) => checkReportRow(props.row, checked)" />
         </q-td>
 
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
           {{ col.value }}
           <div v-if="col.name === 'actions'">
-            <q-btn
-              flat
-              round
-              size="sm"
-              icon="visibility"
-              color="secondary"
-              class="q-mr-xs"
-              :to="{
-                name: 'ReportMaintenanceView',
-                params: { id: props.row.id },
-              }"
-              v-if="!isAdmin"
-            />
-            <q-btn
-              flat
-              round
-              size="sm"
-              icon="edit"
-              color="secondary"
-              class="q-mr-xs"
-              :to="{
-                name: 'ReportMaintenanceView',
-                params: { id: props.row.id },
-              }"
-              v-if="isAdmin || isEditor"
-            >
+            <!-- If is Only Viewer -->
+            <q-btn flat round size="sm" icon="visibility" color="secondary" class="q-mr-xs" :to="{
+              name: 'ReportMaintenanceView',
+              params: { id: props.row.id },
+            }" v-if="canEdit()">
+              <q-tooltip>View Report</q-tooltip>
             </q-btn>
-            <q-btn
-              flat
-              round
-              size="sm"
-              icon="delete"
-              color="negative"
-              @click="deleteReportTrigger(props.row)"
-              :disable="!isAdmin"
-            />
+
+            <!-- If is Admin or Editor -->
+            <q-btn flat round size="sm" icon="edit" color="secondary" class="q-mr-xs" :to="{
+              name: 'ReportMaintenanceView',
+              params: { id: props.row.id },
+            }" v-if="isEditor || isAdmin">
+              <q-tooltip>Edit Report</q-tooltip>
+            </q-btn>
+
+            <!-- If is Only Admin -->
+            <q-btn flat round size="sm" icon="delete" color="negative" @click="deleteReportTrigger(props.row)"
+              :disable="!isAdmin">
+              <q-tooltip>Delete Report</q-tooltip>
+            </q-btn>
           </div>
         </q-td>
       </q-tr>
@@ -116,56 +68,26 @@
             </h6>
             <!-- This is expand slot for row above: {{ props.row.reportname }}. -->
             <div class="row" style="border-top: 1px solid #ccc">
-              <div
-                class="col-4"
-                style="
+              <div class="col-4" style="
                   display: flex;
                   flex-direction: column;
                   border-right: 1px solid #ccc;
                   padding-top: 5px;
-                "
-              >
+                ">
                 <span>All Groups</span>
-                <q-checkbox
-                  v-for="group in allGroups"
-                  v-model="group.isSelected"
-                  :key="group.name"
-                  :label="group.name"
-                  color="secondary"
-                />
+                <q-checkbox v-for="group in allGroups" v-model="group.isSelected" :key="group.name" :label="group.name"
+                  color="secondary" />
 
-                <!-- <div v-for="group in allGroups" :key="group.id">
-                  <q-checkbox v-model="columns.selectedGroups" :val="group.id" :label="group.name" />
-                </div> -->
-
-                <q-btn
-                  label="Update"
-                  color="secondary"
-                  @click="updateReportsGroups(props.row)"
-                ></q-btn>
+                <q-btn label="Update" color="secondary" @click="updateReportsGroups(props.row)"
+                  :disable="allGroups.length === 0"></q-btn>
               </div>
-              <div
-                class="col-8"
-                style="
+              <div class="col-8" style="
                   display: flex;
                   justify-content: space-between;
                   flex-direction: column;
                   padding-top: 5px;
                   padding-left: 10px;
-                "
-              >
-                <!-- <span>Permissions</span>
-                <div v-for="role in groups" :key="role" :label="role" color="secondary">
-                  <q-checkbox v-for="permission in role.userPermissions" v-model="selectedRoles" :key="permission" :label="permission" color="secondary">
-                  {{ permission }}
-                </q-checkbox>
-                </div> -->
-                <!-- <q-checkbox v-model="value" label="Owner" color="secondary" />
-                <q-checkbox v-model="value2" label="ReadOnly" color="secondary" />
-                <q-checkbox v-model="value3" label="ParcialWritter" color="secondary" />
-                <q-checkbox v-model="value" label="Owner" color="secondary" />
-                <q-checkbox v-model="value2" label="ReadOnly" color="secondary" />
-                <q-checkbox v-model="value3" label="ParcialWritter" color="secondary" /> -->
+                ">
               </div>
             </div>
           </div>
@@ -246,7 +168,7 @@ const columns = [
   {
     name: 'owner',
     align: 'left',
-    label: 'Dept. Owner',
+    label: 'Business Unit Owner',
     field: 'owner',
     sortable: true,
   },
@@ -287,8 +209,6 @@ const rows = ref([
 ])
 
 const deleteReportTrigger = (row) => {
-  console.log('Delete Report:', row)
-
   // Confirms the Name of the report to be deleted
   reportName.value = row?.reportname
   reportId.value = row?.id
@@ -300,7 +220,6 @@ const deleteReportTrigger = (row) => {
 const confirmDeleteReport = () => {
   deleteReport(reportId.value)
     .then((response) => {
-      console.log('Delete Report Response:', response)
       if (response) {
         $q.notify({
           color: 'positive',
@@ -310,7 +229,6 @@ const confirmDeleteReport = () => {
         // Fetch all reports again to update the table
         fetchAllReports()
       } else {
-        console.error('Failed to delete report')
         $q.notify({
           color: 'negative',
           message: 'Failed to delete Report. Please try again.',
@@ -478,6 +396,25 @@ const checkReportRow = async (row, checked) => {
   fetchAllReports()
 }
 
+const canView = () => {
+  // se for viewer e editor, retorna true:
+  if (isViewer.value && isEditor.value) {
+    return false;
+  } else if (isViewer.value && !isEditor.value) {
+    return true;
+  } else if (!isViewer.value && isEditor.value) {
+    return false;
+  }
+}
+const canEdit = () => {
+  // se for viewer e editor, retorna false:
+  if (isViewer.value && isEditor.value) {
+    return false;
+  } else if (isViewer.value && !isEditor.value) {
+    return true;
+  }
+}
+
 onMounted(async () => {
   //Get information about the current user on session storage
   loggedInUser.value = JSON.parse(sessionStorage.getItem('currentUser'))
@@ -485,6 +422,9 @@ onMounted(async () => {
   await initializeCookieValues()
   fetchAllReports()
   await fetchAllGroups()
+
+  console.log("Can Edit:", canEdit());
+
 })
 </script>
 <style lang="scss">

@@ -146,9 +146,6 @@ const getUserByUsername = async (username) => {
   }
 };
 
-
-
-
 const getAllGroups = async () => {
   try {
     const response = await apiClient.get('/roles/get-all-groups');
@@ -159,6 +156,17 @@ const getAllGroups = async () => {
   }
 };
 
+const getGroupById = async (groupId) => {
+  try {
+    const response = await apiClient.get('/roles/get-group-by-id', {
+      params: { groupId }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching group by ID:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
 
 const createGroupInDirectory = async (directoryId, groupData) => {
   try {
@@ -404,6 +412,7 @@ export default boot(({ app }) => {
     getUserRolesAndGroups,
     getUserByUsername,
     getAllGroups,
+    getGroupById,
     createGroupInDirectory,
     get_current_directory_groups_user_in,
     addUsersToGroupFromDirectory,
@@ -429,6 +438,7 @@ export {
   getUserRolesAndGroups,
   getUserByUsername,
   getAllGroups,
+  getGroupById,
   createGroupInDirectory,
   get_current_directory_groups_user_in,
   getAllGroupsAndChildrenInDirectory,

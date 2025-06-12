@@ -11,6 +11,10 @@ const reportSchema = new mongoose.Schema(
       type: [String],
       required: true,
     },
+    reportDepartment: {
+      type: [String],
+      required: true,
+    },
     fileColumns: {
       type: Schema.Types.Mixed,
       required: true,

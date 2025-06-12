@@ -6,24 +6,11 @@
         <q-card-section>
           <div class="row">
             <div class="col-3">
-              <q-select
-                flat
-                dense
-                v-model="filterByDepartment"
-                :options="deptSelectOptions"
-                map-options
-                emit-value
-                option-label="label"
-                option-value="value"
-                label="Business Unit"
-                @update:model-value="filterRowsByDepartment"
-              >
+              <q-select flat dense v-model="filterByDepartment" :options="deptSelectOptions" map-options emit-value
+                option-label="label" option-value="value" label="Business Unit"
+                @update:model-value="filterRowsByDepartment">
                 <template v-if="filterByDepartment" v-slot:append>
-                  <q-icon
-                    name="cancel"
-                    @click.stop.prevent="clearDepartmentFilter"
-                    class="cursor-pointer"
-                  />
+                  <q-icon name="cancel" @click.stop.prevent="clearDepartmentFilter" class="cursor-pointer" />
                 </template>
               </q-select>
             </div>
@@ -34,60 +21,31 @@
   </q-list>
   <!-- End Filters -->
   <!-- Report Table -->
-  <q-table
-    flat
-    square
-    :rows="rows"
-    :columns="columns"
-    row-key="id"
-    bordered
-    virtual-scroll
-    :rows-per-page-options="[15, 25, 0]"
-    class="sticky-header-table"
-    :loading="loadingReportRows"
-  >
+  <q-table flat square :rows="rows" :columns="columns" row-key="id" bordered virtual-scroll
+    :rows-per-page-options="[15, 25, 0]" class="sticky-header-table" :loading="loadingReportRows">
     <!-- Generic Slot for All Cells with Q-EDIT-POPUP -->
     <template v-slot:body-cell="props">
       <q-td :props="props">
+        <!-- This Code Below is used 3 lines below to Validate if a Logged User Can Update Information -->
+        <!-- v-if="isWriteOnly || canInviteOrShare || isEditor || isAdmin" -- This code here is only to Give any IDEIA, the original is used below -->
         <template v-if="props.col.name !== 'actions'">
           {{ formatDisplay(props.value, getFieldType(props.col.name)) }}
-          <q-popup-edit v-model="props.row[props.col.name]" auto-save v-slot="scope">
+          <q-popup-edit v-model="props.row[props.col.name]" auto-save v-slot="scope"
+            v-if="isWriteOnly || canInviteOrShare || isEditor || isAdmin">
             <template v-if="getFieldType(props.col.name) === 'date'">
-              <q-date
-                v-model="scope.value"
-                mask="DD/MM/YYYY"
-                @keyup.enter="scope.set"
-                flat
-                minimal
-                :disable="props.col.disable && !isAdmin"
-              />
+              <q-date v-model="scope.value" mask="DD/MM/YYYY" @keyup.enter="scope.set" flat minimal
+                :disable="props.col.disable && !isAdmin" />
             </template>
             <template v-else-if="props.col.name === 'status'">
-              <q-select
-                flat
-                dense
-                v-model="scope.value"
-                :options="[
-                  { label: 'Open', value: 'Open' },
-                  { label: 'Closed', value: 'Closed' },
-                  { label: 'Overdue', value: 'Overdue' },
-                ]"
-                @keyup.enter="scope.set"
-                option-label="label"
-                option-value="value"
-                emit-value
-                :disable="!isAdmin"
-              />
+              <q-select flat dense v-model="scope.value" :options="[
+                { label: 'Open', value: 'Open' },
+                { label: 'Closed', value: 'Closed' },
+                { label: 'Overdue', value: 'Overdue' },
+              ]" @keyup.enter="scope.set" option-label="label" option-value="value" emit-value :disable="!isAdmin" />
             </template>
             <template v-else>
-              <q-input
-                :type="getFieldType(props.col.name) === 'number' ? 'number' : 'textarea'"
-                rows="3"
-                v-model="scope.value"
-                dense
-                autofocus
-                @keyup.enter="scope.set"
-              />
+              <q-input :type="getFieldType(props.col.name) === 'number' ? 'number' : 'textarea'" rows="3"
+                v-model="scope.value" dense autofocus @keyup.enter="scope.set" />
             </template>
           </q-popup-edit>
         </template>
@@ -103,16 +61,8 @@
         <!--/ End Status Column -->
         <!-- Actions Column -->
         <template v-else>
-          <q-btn
-            size="sm"
-            icon="delete"
-            color="negative"
-            flat
-            round
-            dense
-            @click="removerLinha(props.row, props.rowIndex)"
-            :disable="!isAdmin"
-          />
+          <q-btn size="sm" icon="delete" color="negative" flat round dense
+            @click="removerLinha(props.row, props.rowIndex)" :disable="!isAdmin" />
         </template>
         <!--/ End Actions Column -->
       </q-td>
@@ -121,8 +71,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { getSingleReportById, updateReport } from 'src/boot/reports'
+import { getGroupById } from 'src/boot/roles'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import * as XLSX from 'xlsx'
@@ -145,6 +96,17 @@ const isAdmin = ref(false)
 const isEditor = ref(false)
 const isViewer = ref(false)
 const isAuditor = ref(false)
+
+// Working with user permissions
+const groupsIds = ref([])
+const groupsOfReport = ref([])
+const groupPermissions = ref([]);
+const hasRead = ref([]);
+const isReadOnly = ref(false);
+const hasWrite = ref([]);
+const isWriteOnly = ref(false);
+const hasInviteOrShare = ref([])
+const canInviteOrShare = ref(false);
 
 const getCookie = async (name) => {
   if (isElectron.value) {
@@ -258,10 +220,10 @@ const formatDisplay = (value, type) => {
     const d = parseAnyDate(value)
     return d
       ? new Intl.DateTimeFormat('pt-PT', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-        }).format(d)
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }).format(d)
       : value
   }
 
@@ -277,7 +239,7 @@ const formatDisplay = (value, type) => {
 
 // Export to Excel
 const exportToExcel = () => {
-  //Filter 'Actions' column from rows
+  //Filter 'Actions' column from rows and Remove it
   const filteredColumns = columns.value.filter((col) => col?.name !== 'actions')
   const filteredRows = rows.value.map((row) => {
     const newRow = {}
@@ -286,8 +248,8 @@ const exportToExcel = () => {
     })
     return newRow
   })
-  // const plainRows = rows.value.map((row) => ({ ...row }))
   const plainRows = filteredRows
+  // const plainRows = rows.value.map((row) => ({ ...row }))
 
   const worksheet = XLSX.utils.json_to_sheet(plainRows)
   const workbook = XLSX.utils.book_new()
@@ -330,17 +292,19 @@ const fetchReportData = async () => {
   loadingReportRows.value = true
   getSingleReportById(reportId.value)
     .then((response) => {
-      //Atribute the response to the variables
+
+      //Assign the response to each corresponding variable
       reportName.value = response.report.reportName || ''
       reportMonth.value = response.report.reportMonth || ''
+      groupsIds.value = response.report?.groups || []
 
       //Columns and Rows
       rows.value = response.report.fileRows || []
-      columns.value = response.report.fileColumns || []
-      columns.value = (response.report.fileColumns || []).map((col) => ({
+
+      columns.value = (response.report.fileColumns || []).map(col => ({
         align: 'left',
-        ...col,
-      }))
+        ...col
+      }));
 
       // Emit the report name to the parent component
       const payload = {
@@ -351,12 +315,77 @@ const fetchReportData = async () => {
 
       hasDateColumn(columns.value)
       loadingReportRows.value = false
+
+      getReportsGroupsById(groupsIds.value)
     })
     .catch((error) => {
       console.error(error)
       loadingReportRows.value = false
     })
 }
+
+// Fetch groups by IDs and extract permissions
+const getReportsGroupsById = async (groupsIds) => {
+  groupsOfReport.value = [];
+  groupPermissions.value = [];
+
+  // Executes multiple fetches in parallel and waits for all
+  const groups = await Promise.all(
+    groupsIds.map(id => getGroupById(id))
+  );
+
+  // Keep found groups
+  groupsOfReport.value = groups;
+  console.log('Groups of Report:', groupsOfReport.value);
+
+  // Extract permissions from each group
+  groupPermissions.value = groups
+    .flatMap(group => group?.userPermissions || []);
+
+  // Remove duplicates from groupPermissions
+  groupPermissions.value = [...new Set(groupPermissions.value)];
+
+  console.log('Group Permissions:', groupPermissions.value);
+
+  hasRead.value = (columns.value || [])
+    .map((col, i) => {
+      const hasPermission = Array.isArray(col?.permissions)
+        && groupPermissions.value.includes('read');
+      return hasPermission;
+    });
+  hasWrite.value = (columns.value || [])
+    .map((col, i) => {
+      const hasPermission = Array.isArray(col?.permissions)
+        && groupPermissions.value.includes('write');
+      return hasPermission;
+    });
+  hasInviteOrShare.value = (columns.value || [])
+    .map((col, i) => {
+      const hasPermission = Array.isArray(col?.permissions)
+        && groupPermissions.value.includes('invite_member')
+      return hasPermission;
+    });
+
+  // Set isReadOnly to TRUE if hasRead values are all TRUE, except the first value
+  isReadOnly.value = hasRead.value.every((val, index) => {
+    if (index === 0) return true; // Skip the first value
+    return val === true;
+  });
+  // Set isWriteOnly to TRUE if hasWrite values are all TRUE, except the first value
+  isWriteOnly.value = hasWrite.value.every((val, index) => {
+    if (index === 0) return true; // Skip the first value
+    return val === true;
+  });
+  // Set canInviteOrShare to TRUE if hasInviteOrShare values are all TRUE, except the first value
+  canInviteOrShare.value = hasInviteOrShare.value.every((val, index) => {
+    if (index === 0) return true; // Skip the first value
+    return val === true;
+  });
+
+  console.log('isReadOnly:', isReadOnly.value);
+  console.log('isWriteOnly:', isWriteOnly.value);
+  console.log('canInviteOrShare:', canInviteOrShare.value);
+};
 
 onMounted(async () => {
   reportId.value = route.params.id
@@ -367,20 +396,22 @@ onMounted(async () => {
 })
 
 const deptSelectOptions = [
+  { label: 'All', value: 'All' },
+  { label: 'AML', value: 'AML' },
+  { label: 'Business & Payments', value: 'Business & Payments' },
   { label: 'Compliance', value: 'Compliance' },
-  { label: 'Sales', value: 'Sales' },
-  { label: 'Marketing', value: 'Marketing' },
-  { label: 'Finance', value: 'Finance' },
-  { label: 'Operations', value: 'Operations' },
-  { label: 'Support', value: 'Support' },
-  { label: 'Technology', value: 'Technology' },
+  { label: 'Core & Digital', value: 'Core & Digital' },
   { label: 'Customer Service', value: 'Customer Service' },
+  { label: 'Finance', value: 'Finance' },
+  { label: 'Financial Services', value: 'Financial Services' },
   { label: 'Human Resources', value: 'Human Resources' },
   { label: 'IT', value: 'IT' },
-  { label: 'Core & Digital', value: 'Core & Digital' },
+  { label: 'Marketing', value: 'Marketing' },
+  { label: 'Operations', value: 'Operations' },
   { label: 'Risk', value: 'Risk' },
-  { label: 'Business & Payments', value: 'Business & Payments' },
-  { label: 'Financial Services', value: 'Financial Services' },
+  { label: 'Sales', value: 'Sales' },
+  { label: 'Support', value: 'Support' },
+  { label: 'Technology', value: 'Technology' },
 ]
 
 defineExpose({
@@ -393,10 +424,6 @@ defineExpose({
 .q-table tbody td
   max-width: 500px !important;
   white-space: normal !important;
-
-  .my-sticky-header-table
-  /* height or max-height is important */
-  height: 310px
 
   .q-table__top,
   .q-table__bottom,

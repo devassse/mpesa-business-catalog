@@ -2,8 +2,12 @@ const Report = require("../../../models/reports/report");
 
 const createReport = async (req, res) => {
   const reportFields = req.body;
+
+  console.log("Creating report with fields:", reportFields.reportDepartment);
+
   const reportName = reportFields.reportname;
   const reportMonth = reportFields.reportmonth;
+  const reportDepartment = reportFields.reportdepartment || [];
   const fileColumns = reportFields.importedFileColumns;
   const fileRows = reportFields.importedFileRows;
 
@@ -16,6 +20,7 @@ const createReport = async (req, res) => {
   const newReport = new Report({
     reportName,
     reportMonth,
+    reportDepartment,
     fileColumns,
     fileRows,
   });
