@@ -82,9 +82,7 @@
           <!-- Top Description -->
           <div class="row" style="display: flex; align-items: center">
             <div class="col-8">
-              <q-chip color="red" text-color="white" icon="free_cancellation"
-                >Tickets Overdue</q-chip
-              >
+              <q-chip color="red" text-color="white" icon="free_cancellation">Tickets Overdue</q-chip>
             </div>
             <div class="col-4" style="text-align: right">
               <q-btn flat size="sm" round color="primary" icon="arrow_right" />
@@ -110,12 +108,7 @@
     </div>
     <div class="col-5">
       <div id="chart">
-        <apexchart
-          type="line"
-          height="350"
-          :options="lineChartOptions"
-          :series="lineSeries"
-        ></apexchart>
+        <apexchart type="line" height="350" :options="lineChartOptions" :series="lineSeries"></apexchart>
       </div>
     </div>
   </div>
@@ -126,17 +119,12 @@
     <q-table flat :rows="rows" :columns="columns" row-key="name">
       <template v-slot:body-cell-priority="props">
         <q-td :props="props">
-          <q-badge
-            :color="
-              props.row.priority === 'High'
-                ? 'red'
-                : props.row.priority === 'Medium'
-                ? 'orange'
-                : 'green'
-            "
-            text-color="white"
-            class="q-pa-xs"
-          >
+          <q-badge :color="props.row.priority === 'High'
+            ? 'red'
+            : props.row.priority === 'Medium'
+              ? 'orange'
+              : 'green'
+            " text-color="white" class="q-pa-xs">
             {{ props.row.priority }}
           </q-badge>
         </q-td>
@@ -150,25 +138,15 @@
       </template>
       <template v-slot:body-cell-overdue="props">
         <q-td :props="props">
-          <q-badge
-            :color="new Date(props.row.overdue) < new Date() ? 'red' : 'green'"
-            text-color="white"
-            class="q-pa-xs"
-          >
+          <q-badge :color="new Date(props.row.overdue) < new Date() ? 'red' : 'green'" text-color="white"
+            class="q-pa-xs">
             {{ props.row.overdue }}
           </q-badge>
         </q-td>
       </template>
       <template v-slot:body-cell-actions="props">
         <q-td align="right">
-          <q-btn
-            flat
-            size="sm"
-            round
-            icon="arrow_forward"
-            color="secondary"
-            @click="edit(props.row)"
-          />
+          <q-btn flat size="sm" round icon="arrow_forward" color="secondary" @click="edit(props.row)" />
         </q-td>
       </template>
     </q-table>
@@ -188,88 +166,34 @@
         <p class="text-h6">Personal Details</p>
         <div class="row q-col-gutter-md q-mb-lg">
           <div class="col-6">
-            <q-input v-model="newTicketName" label="Ticket Name" dense />
-            <q-input
-              v-model="newTicketDescription"
-              label="Description"
-              type="textarea"
-              dense
-              rows="3"
-            />
+            <q-input v-model="ticketDesignation" label="Ticket Designation" dense />
+            <q-input v-model="ticketDescription" label="Description" type="textarea" dense rows="3" />
           </div>
           <div class="col-6">
             <q-input v-model="newGroupName" label="Line Manager Email" dense />
-            <q-input
-              v-model="newGroupDescription"
-              label="Description"
-              type="textarea"
-              dense
-              rows="3"
-            />
+            <q-input v-model="newGroupDescription" label="Description" type="textarea" dense rows="3" />
           </div>
         </div>
 
         <p class="text-h6">Common Requests Details</p>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-select
-              v-model="newTicketPriority"
-              :options="priorityOptions"
-              label="Priority"
-              dense
-              emit-value
-              map-options
-            />
-            <q-select
-              v-model="newGroupParent"
-              :options="flattenedGroups"
-              option-label="name"
-              option-value="_id"
-              label="Parent Group (optional)"
-              dense
-              emit-value
-              map-options
-              @update:model-value="updateAvailablePermissions"
-            />
-            <q-select
-              v-model="newGroupPermissions"
-              :options="availablePermissions"
-              label="User Permissions"
-              multiple
-              dense
-              emit-value
-              map-options
-            />
+            <q-select v-model="newTicketPriority" :options="priorityOptions" label="Priority" dense emit-value
+              map-options />
+            <q-select v-model="newGroupParent" :options="flattenedGroups" option-label="name" option-value="_id"
+              label="Parent Group (optional)" dense emit-value map-options
+              @update:model-value="updateAvailablePermissions" />
+            <q-select v-model="newGroupPermissions" :options="availablePermissions" label="User Permissions" multiple
+              dense emit-value map-options />
           </div>
           <div class="col-6">
-            <q-select
-              v-model="newTicketPriority"
-              :options="priorityOptions"
-              label="Priority"
-              dense
-              emit-value
-              map-options
-            />
-            <q-select
-              v-model="newGroupParent"
-              :options="flattenedGroups"
-              option-label="name"
-              option-value="_id"
-              label="Parent Group (optional)"
-              dense
-              emit-value
-              map-options
-              @update:model-value="updateAvailablePermissions"
-            />
-            <q-select
-              v-model="newGroupPermissions"
-              :options="availablePermissions"
-              label="User Permissions"
-              multiple
-              dense
-              emit-value
-              map-options
-            />
+            <q-select v-model="newTicketPriority" :options="priorityOptions" label="Priority" dense emit-value
+              map-options />
+            <q-select v-model="newGroupParent" :options="flattenedGroups" option-label="name" option-value="_id"
+              label="Parent Group (optional)" dense emit-value map-options
+              @update:model-value="updateAvailablePermissions" />
+            <q-select v-model="newGroupPermissions" :options="availablePermissions" label="User Permissions" multiple
+              dense emit-value map-options />
           </div>
         </div>
       </q-card-section>
@@ -286,8 +210,49 @@
 import { ref } from 'vue'
 import ApexCharts from 'vue3-apexcharts'
 
+const ticketDesignation = ref('')
+const ticketDescription = ref('')
+const newGroupName = ref('')
+const newGroupDescription = ref('')
+const newTicketPriority = ref('')
+const newGroupParent = ref(null)
+const newGroupPermissions = ref([])
 const createTicketDialog = ref(false)
+const flattenedGroups = ref([]) // This should be populated with the actual groups data
+const availablePermissions = ref([
+  { label: 'Read', value: 'read' },
+  { label: 'Write', value: 'write' },
+  { label: 'Execute', value: 'execute' },
+])
+const priorityOptions = ref([
+  { label: 'High', value: 'High' },
+  { label: 'Medium', value: 'Medium' },
+  { label: 'Low', value: 'Low' },
+])
 
+
+const updateAvailablePermissions = () => {
+  // Logic to update available permissions based on selected parent group
+  // This is a placeholder function, implement as needed
+}
+
+const createGroup = () => {
+  // Logic to create a new ticket
+  // This is a placeholder function, implement as needed
+  console.log('Creating ticket with:', {
+    designation: ticketDesignation.value,
+    description: ticketDescription.value,
+    priority: newTicketPriority.value,
+    parent: newGroupParent.value,
+    permissions: newGroupPermissions.value,
+  })
+  createTicketDialog.value = false // Close the dialog after creating the ticket
+}
+const edit = (row) => {
+  // Logic to edit the ticket
+  // This is a placeholder function, implement as needed
+  console.log('Editing ticket:', row)
+}
 const enableAddTicket = () => {
   createTicketDialog.value = true
 }
@@ -498,7 +463,7 @@ export default {
   font-weight: normal;
 }
 
-.q-dialog__inner--minimized > div {
+.q-dialog__inner--minimized>div {
   max-width: 80% !important;
 }
 </style>

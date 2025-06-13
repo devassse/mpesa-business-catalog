@@ -4,12 +4,12 @@
       <q-card-section horizontal>
         <q-card-section class="q-pa-none q-pt-md" style="min-width: 54%">
           <q-tabs v-model="tab" align="justify" narrow-indicator class="q-mb-lg">
-            <q-tab class="text-dark q-ml-md" name="forgotpassword" label="Reset Password" />
+            <q-tab class="text-dark q-ml-md" name="forgotpassword" label="Forgot Password" />
           </q-tabs>
           <q-tab-panels v-model="tab" animated transition-prev="scale" transition-next="scale"
             class="text-dark text-center q-pa-none">
             <q-tab-panel name="forgotpassword">
-              <div class="text-h6 q-mt-xl">Reset Password <br /> M-Pesa Business Catalog</div>
+              <div class="text-h6 q-mt-xl">Forgot Password <br /> M-Pesa Business Catalog</div>
               <div class="text-caption q-pb-lg">It Makes working fun!</div>
               <q-form style="width: 100%" @submit="onSubmit" class="q-gutter-md">
                 <q-input filled dense v-model="email" label="Your email" hint="name.surname@vm.co.mz" lazy-rules

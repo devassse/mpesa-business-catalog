@@ -42,7 +42,8 @@
       </q-select>
 
       <div class="q-mt-md text-right">
-        <q-btn flat color="secondary" no-caps @click="activateSignupTab">Already have an account? Sign in</q-btn>
+        <span>Already have an account?</span>
+        <q-btn dense flat color="secondary" no-caps @click="activateSignupTab" style="margin-top: -3px;">Log in</q-btn>
       </div>
 
       <div class="q-mt-lg">

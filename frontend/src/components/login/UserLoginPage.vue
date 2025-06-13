@@ -17,12 +17,15 @@
         </template>
       </q-input>
       <div class="q-mt-md text-right">
-        <q-btn flat color="secondary" no-caps
-        type="button"
-          @click="forgotPassword">
-          Forgot Password?
-        </q-btn>
-        Don't have an account? <q-btn dense flat no-caps color="secondary" @click="activateSigninTab">Sign up</q-btn>
+        <div><q-btn dense flat color="secondary" no-caps type="button" @click="forgotPassword"
+            style="margin-top: -3px;">
+            Forgot Password?
+          </q-btn></div>
+        <div>
+          <span>Don't have an account?</span>
+          <q-btn dense flat no-caps color="secondary" @click="activateSigninTab" style="margin-top: -3px;">Sign
+            up</q-btn>
+        </div>
       </div>
       <div class="q-mt-xl">
         <q-btn label="Reset" type="reset" color="negative" />

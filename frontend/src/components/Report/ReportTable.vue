@@ -440,7 +440,6 @@ defineExpose({
     color: #fff !important
     opacity: 1 !important
 
-
 .q-table tbody td
   max-width: 500px !important;
   white-space: normal !important;
@@ -454,6 +453,9 @@ defineExpose({
   thead tr th
     position: sticky
     z-index: 1
+    max-width: 500px !important
+    white-space: normal !important
+    border: 1px dotted red !important
   thead tr:first-child th
     top: 0
 
