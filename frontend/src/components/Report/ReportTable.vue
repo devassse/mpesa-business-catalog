@@ -21,7 +21,7 @@
   </q-list>
   <!-- End Filters -->
   <!-- Report Table -->
-  <q-table flat square :rows="rows" :columns="columns" row-key="id" bordered virtual-scroll @row-click="onRowClick"
+  <q-table flat square :rows="rows" :columns="columns" row-key="id" bordered virtual-scroll
     :rows-per-page-options="[15, 25, 0]" class="sticky-header-table" :loading="loadingReportRows" :filter="filter">
     <!-- Search -->
     <template v-slot:top-right>
@@ -70,6 +70,8 @@
         <!--/ End Status Column -->
         <!-- Actions Column -->
         <template v-else>
+          <q-btn size="sm" icon="ads_click" color="orange" flat round dense
+            @click="duplicateRow(props.row, props.rowIndex)" :disable="!isAdmin" />
           <q-btn size="sm" icon="delete" color="negative" flat round dense
             @click="removerLinha(props.row, props.rowIndex)" :disable="!isAdmin" />
         </template>
@@ -393,31 +395,12 @@ const getReportsGroupsById = async (groupsIds) => {
     if (index === 0) return true; // Skip the first value
     return val === true;
   });
-
-  console.log('isReadOnly:', isReadOnly.value);
-  console.log('isWriteOnly:', isWriteOnly.value);
-  console.log('canInviteOrShare:', canInviteOrShare.value);
 };
 
-const onRowClick = (props) => {
-  const currentTime = Date.now();
-  const timeSinceLastClick = currentTime - lastClickTime.value;
-
-
-
-  if (timeSinceLastClick < 300) {
-    // duplicateRow(props.row);
-    console.log('Duplication triggered for row:', props);
-
-  } else {
-    lastClickTime.value = currentTime;
-    console.log('Row clicked:', props);
-  }
-}
-
-const duplicateRow = (row) => {
+// Dubplicate row right below the current row
+const duplicateRow = (row, index) => {
   const newRow = { ...row }
-  rows.value.push(newRow)
+  rows.value.splice(index + 1, 0, newRow)
 
   $q.notify({
     color: 'positive',

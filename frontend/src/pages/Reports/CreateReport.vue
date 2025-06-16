@@ -3,14 +3,36 @@
     <q-toolbar-title>
       {{ reportname || '-------' }}
     </q-toolbar-title>
-    <q-btn flat round dense icon="table_chart" class="q-mr-xs" @click="showDialog = true">
+    <q-btn
+      flat
+      round
+      dense
+      icon="table_chart"
+      class="q-mr-xs"
+      @click="showDialog = true"
+    >
       <q-tooltip> Add New Column </q-tooltip>
     </q-btn>
-    <q-btn flat round dense icon="table_rows" class="q-mr-xs" @click="addNewRow"
-      :disable="importedFileColumns.length == 0">
+    <q-btn
+      flat
+      round
+      dense
+      icon="table_rows"
+      class="q-mr-xs"
+      @click="addNewRow"
+      :disable="importedFileColumns.length == 0"
+    >
       <q-tooltip> Add New Row </q-tooltip>
     </q-btn>
-    <q-btn flat round dense icon="save" class="q-mr-xs" @click="saveReport" :disable="importedFileColumns.length == 0">
+    <q-btn
+      flat
+      round
+      dense
+      icon="save"
+      class="q-mr-xs"
+      @click="saveReport"
+      :disable="importedFileColumns.length == 0"
+    >
       <q-tooltip> Save </q-tooltip>
     </q-btn>
     <q-btn flat round dense to="/reports" icon="arrow_back">
@@ -28,9 +50,20 @@
         </q-input>
       </div>
       <div class="col-3">
-        <q-select dense clearable v-model="reportmonth" use-input multiple input-debounce="0" emit-value
-          label="Corresponding Month(s)" :options="monthOptions" option-label="label" option-value="value"
-          @filter="filterFn">
+        <q-select
+          dense
+          clearable
+          v-model="reportmonth"
+          use-input
+          multiple
+          input-debounce="0"
+          emit-value
+          label="Corresponding Month(s)"
+          :options="monthOptions"
+          option-label="label"
+          option-value="value"
+          @filter="filterFn"
+        >
           <template v-slot:no-option>
             <q-item>
               <q-item-section class="text-grey"> No results </q-item-section>
@@ -43,9 +76,20 @@
       </div>
 
       <div class="col-3">
-        <q-select dense clearable v-model="reportdepartment" use-input multiple input-debounce="0" emit-value
-          label="Business Unit Owner" :options="departmenthOptions" option-label="label" option-value="value"
-          @filter="filterDeptFn">
+        <q-select
+          dense
+          clearable
+          v-model="reportdepartment"
+          use-input
+          multiple
+          input-debounce="0"
+          emit-value
+          label="Business Unit Owner"
+          :options="departmenthOptions"
+          option-label="label"
+          option-value="value"
+          @filter="filterDeptFn"
+        >
           <template v-slot:no-option>
             <q-item>
               <q-item-section class="text-grey"> No results </q-item-section>
@@ -59,10 +103,24 @@
 
       <!-- Upload Excel File -->
       <div class="col-3">
-        <q-file dense v-model="existingfile" clearable accept=".csv, .xlsx, .xls" label="Upload Existing .xlx(s)"
-          @update:model-value="handleFileUpload">
+        <q-file
+          dense
+          v-model="existingfile"
+          accept=".csv, .xlsx, .xls"
+          label="Upload Existing .xlx(s)"
+          @update:model-value="handleFileUpload"
+        >
           <template v-slot:prepend>
             <q-icon name="cloud_upload" @click.stop.prevent />
+          </template>
+          <template v-slot:append>
+            <q-btn
+            v-if="existingfile"
+              flat
+              dense
+              icon="cancel"
+              @click.stop.prevent="clearFileAndResetTable"
+            />
           </template>
         </q-file>
       </div>
@@ -70,24 +128,57 @@
     </div>
 
     <!-- Report Table -->
-    <q-table flat bordered square :rows="importedFileRows" :columns="importedFileColumns" row-key="id"
-      class="sticky-header-table" :rows-per-page-options="[9]">
+    <q-table
+      flat
+      bordered
+      square
+      :rows="importedFileRows"
+      :columns="importedFileColumns"
+      row-key="id"
+      class="sticky-header-table"
+      :rows-per-page-options="[9]"
+    >
       <!-- Enables Edit Table Headers -->
       <template #header="props">
         <q-tr :props="props">
-          <q-th v-for="(col, index) in props.cols" :key="col?.name" style="text-align: left" draggable
-            @dragstart="onDragStart($event, index)" @dragover.prevent @drop="onDrop($event, index)">
+          <q-th
+            v-for="(col, index) in props.cols"
+            :key="col?.name"
+            style="text-align: left"
+            draggable
+            @dragstart="onDragStart($event, index)"
+            @dragover.prevent
+            @drop="onDrop($event, index)"
+          >
             <div class="row items-center no-wrap">
               <span>{{ capitalize(col?.label) }}</span>
 
               <!-- Popup edit -->
-              <q-popup-edit :model-value="col?.label" v-slot="scope" @save="(val) => updateColumnLabel(col, val)">
-                <q-input v-model="scope.value" dense autofocus @keyup.enter="scope.set" />
+              <q-popup-edit
+                :model-value="col?.label"
+                v-slot="scope"
+                @save="(val) => updateColumnLabel(col, val)"
+              >
+                <q-input
+                  v-model="scope.value"
+                  dense
+                  autofocus
+                  @keyup.enter="scope.set"
+                />
               </q-popup-edit>
 
               <!-- Delete Column Button -->
-              <q-btn v-if="col?.name !== 'actions'" dense flat round icon="close" size="xs" class="q-ml-xs"
-                style="color: red; margin-top: -10px" @click.stop="deleteColumn(col?.name)">
+              <q-btn
+                v-if="col?.name !== 'actions'"
+                dense
+                flat
+                round
+                icon="close"
+                size="xs"
+                class="q-ml-xs"
+                style="color: red; margin-top: -10px"
+                @click.stop="deleteColumn(col?.name)"
+              >
                 <q-tooltip>Delete Column - {{ col?.name }}</q-tooltip>
               </q-btn>
             </div>
@@ -97,38 +188,81 @@
       <!--/ Enables Edit Table Headers -->
 
       <!-- Slot para coluna custom -->
-      <template v-if="customColumn.name" v-slot:[`body-cell-${customColumn.name}`]="props">
+      <template
+        v-if="customColumn.name"
+        v-slot:[`body-cell-${customColumn.name}`]="props"
+      >
         <q-td :props="props">
           <q-badge color="teal" :label="props.row[customColumn.name]" />
         </q-td>
       </template>
 
-      <template v-for="col in dynamicColumns" :key="col?.name" v-slot:[`body-cell-${col.name}`]="props">
+      <template
+        v-for="col in dynamicColumns"
+        :key="col?.name"
+        v-slot:[`body-cell-${col.name}`]="props"
+      >
         <q-td :props="props">
           <!-- Validade CHIP according to Status -->
           <div v-if="col.name === 'status'">
-            <q-chip v-if="props.row[col.field] === 'Open'" color="green" text-color="white" dense>
+            <q-chip
+              v-if="props.row[col.field] === 'Open'"
+              color="green"
+              text-color="white"
+              dense
+            >
               {{ props.row[col.field] }}
             </q-chip>
-            <q-chip v-else-if="props.row[col.field] === 'Closed'" color="orange" text-color="white" dense>
+            <q-chip
+              v-else-if="props.row[col.field] === 'Closed'"
+              color="orange"
+              text-color="white"
+              dense
+            >
               {{ props.row[col.field] }}
             </q-chip>
-            <q-chip v-else-if="props.row[col.field] === 'Overdue'" color="red" text-color="white" dense>
+            <q-chip
+              v-else-if="props.row[col.field] === 'Overdue'"
+              color="red"
+              text-color="white"
+              dense
+            >
               {{ props.row[col.field] }}
             </q-chip>
             <span v-else>
               {{ props.row[col.field] }}
             </span>
-            <q-popup-edit v-model="props.row[col.field]" auto-save v-slot="scope">
-              <q-select v-model="scope.value" :options="statusOptions" dense emit-value map-options
-                @keyup.enter="scope.set" />
+            <q-popup-edit
+              v-model="props.row[col.field]"
+              auto-save
+              v-slot="scope"
+            >
+              <q-select
+                v-model="scope.value"
+                :options="statusOptions"
+                dense
+                emit-value
+                map-options
+                @keyup.enter="scope.set"
+              />
             </q-popup-edit>
           </div>
           <!-- Senão, exibe o render cell habitual + popup edit -->
           <div v-else>
             {{ renderCell(col.name, props.row[col.field], props.row) || '---' }}
-            <q-popup-edit v-model="props.row[col.field]" auto-save v-slot="scope">
-              <q-input type="textarea" rows="3" v-model="scope.value" dense autofocus @keyup.enter="scope.set" />
+            <q-popup-edit
+              v-model="props.row[col.field]"
+              auto-save
+              v-slot="scope"
+            >
+              <q-input
+                type="textarea"
+                rows="3"
+                v-model="scope.value"
+                dense
+                autofocus
+                @keyup.enter="scope.set"
+              />
             </q-popup-edit>
           </div>
         </q-td>
@@ -136,7 +270,14 @@
 
       <template #body-cell-actions="props">
         <q-td align="right" style="width: 30px">
-          <q-btn size="sm" flat round color="negative" icon="delete" @click="deleteRow(props.row)" />
+          <q-btn
+            size="sm"
+            flat
+            round
+            color="negative"
+            icon="delete"
+            @click="deleteRow(props.row)"
+          />
         </q-td>
       </template>
     </q-table>
@@ -151,61 +292,80 @@
       </q-card-section>
 
       <q-card-section>
-        <q-input v-model="customColumn.label" label="Column Title" outlined dense autofocus />
-        <q-input v-model="customColumn.defaultValue" label="Default Value" outlined dense class="q-mt-sm" />
+        <q-input
+          v-model="customColumn.label"
+          label="Column Title"
+          outlined
+          dense
+          autofocus
+        />
+        <q-input
+          v-model="customColumn.defaultValue"
+          label="Default Value"
+          outlined
+          dense
+          class="q-mt-sm"
+        />
       </q-card-section>
 
       <q-card-actions align="right">
         <q-btn label="Cancel" color="negative" v-close-popup />
-        <q-btn label="Add" color="secondary" @click="addCustomColumn" @keyup.enter="addCustomColumn" />
+        <q-btn
+          label="Add"
+          color="secondary"
+          @click="addCustomColumn"
+          @keyup.enter="addCustomColumn"
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script setup>
-import { useQuasar } from 'quasar'
-import * as XLSX from 'xlsx'
-import { ref, computed } from 'vue'
-import { createReport } from 'src/boot/reports'
+import { useQuasar } from 'quasar';
+import * as XLSX from 'xlsx';
+import { ref, computed } from 'vue';
+import { createReport } from 'src/boot/reports';
 
-const $q = useQuasar()
-let idCounter = 1
-let reportname = ref('')
-let reportmonth = ref([])
-let reportdepartment = ref(null)
-let existingfile = ref(null)
+const $q = useQuasar();
+let idCounter = 1;
+let reportname = ref('');
+let reportmonth = ref([]);
+let reportdepartment = ref(null);
+let existingfile = ref(null);
 
-const excelData = ref([])
-const importedFileRows = ref([])
-const importedFileColumns = ref([])
+const excelData = ref([]);
+const importedFileRows = ref([]);
+const importedFileColumns = ref([]);
 
-const showDialog = ref(false)
+const showDialog = ref(false);
 
 const customColumn = ref({
   label: '',
   defaultValue: '',
   name: '',
-})
+});
 
 // Add Costum Column
 const addCustomColumn = () => {
-  const label = customColumn.value.label?.trim()
-  const defaultVal = customColumn.value.defaultValue
-  if (!label) return
+  const label = customColumn.value.label?.trim();
+  const defaultVal = customColumn.value.defaultValue;
+  if (!label) return;
 
-  const colName = label.toLowerCase().replace(/\s+/g, '_')
-  customColumn.value.name = colName
+  const colName = label.toLowerCase().replace(/\s+/g, '_');
+  customColumn.value.name = colName;
 
-  const alreadyExists = importedFileColumns.value.some((col) => col.name === colName)
+  const alreadyExists = importedFileColumns.value.some(
+    (col) => col.name === colName,
+  );
 
   if (alreadyExists) {
     $q.notify({
       type: 'warning',
       message: `A coluna "${label}" já existe.`,
       icon: 'warning',
-    })
-    return
+    });
+    return;
   }
 
   // Add New Column
@@ -214,58 +374,56 @@ const addCustomColumn = () => {
     label: label,
     field: colName,
     align: 'left',
-    permissions: ['read', 'write', 'invite_member', "checker"]
-  })
+    permissions: ['read', 'write', 'invite_member', 'checker'],
+  });
 
   importedFileRows.value.forEach((row) => {
-    row[colName] = defaultVal
-  })
+    row[colName] = defaultVal;
+  });
 
-  showDialog.value = false
-  customColumn.value = { label: '', defaultValue: '', name: '' }
-}
+  showDialog.value = false;
+  customColumn.value = { label: '', defaultValue: '', name: '' };
+};
 
 // Delete Column
 const deleteColumn = (columnName) => {
-  importedFileColumns.value = importedFileColumns.value.filter((col) => col.name !== columnName)
+  importedFileColumns.value = importedFileColumns.value.filter(
+    (col) => col.name !== columnName,
+  );
 
   importedFileRows.value = importedFileRows.value.map((row) => {
-    const newRow = { ...row }
-    delete newRow[columnName]
-    return newRow
-  })
-}
+    const newRow = { ...row };
+    delete newRow[columnName];
+    return newRow;
+  });
+};
 
 // Upload Excel File and convert to JSON and build Table
 const handleFileUpload = (file) => {
-  if (!file) return
+  if (!file) return;
 
-  const reader = new FileReader()
+  const reader = new FileReader();
   reader.onload = (e) => {
-    const data = new Uint8Array(e.target.result)
-    const workbook = XLSX.read(data, { type: 'array' })
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
 
     // Read first Sheet
-    const sheetName = workbook.SheetNames[0]
-    const worksheet = workbook.Sheets[sheetName]
-    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
-    excelData.value = json
-
-
-    console.log('Excel Data:', excelData.value)
-
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    excelData.value = json;
 
     // Check for empty columns and handle them
     const checkEmptyColumns = (columns, rows) => {
-      const emptyColumns = []
+      const emptyColumns = [];
 
       // Iterate over each column to check if all cells are empty
       columns.forEach((col, index) => {
-        const isEmpty = rows.every((row) => !row[index] || row[index] === '')
+        const isEmpty = rows.every((row) => !row[index] || row[index] === '');
         if (isEmpty) {
-          emptyColumns.push(col.name)
+          emptyColumns.push(col.name);
         }
-      })
+      });
 
       // If any empty columns exist, notify or handle
       if (emptyColumns.length > 0) {
@@ -273,9 +431,9 @@ const handleFileUpload = (file) => {
           type: 'warning',
           message: `This columns are empty (${emptyColumns.join(', ')})`,
           icon: 'warning',
-        })
+        });
       }
-    }
+    };
 
     // Building Table Headers
     importedFileColumns.value = json[0].map((col, index) => ({
@@ -284,9 +442,9 @@ const handleFileUpload = (file) => {
       label: capitalize(col),
       field: String(col).toLowerCase(),
       align: 'left' || '',
-      permissions: ['read', 'write', 'invite_member', "checker"],
+      permissions: ['read', 'write', 'invite_member', 'checker'],
       user_ids: [],
-    }))
+    }));
 
     // Check if the 'status' column already exists
     // If the 'status' column does not exist, add it
@@ -296,8 +454,8 @@ const handleFileUpload = (file) => {
         label: 'Status',
         field: 'status',
         align: 'right',
-        permissions: ['read', 'write', 'invite_member', "checker"],
-      })
+        permissions: ['read', 'write', 'invite_member', 'checker'],
+      });
     }
 
     // Add a static column at the end
@@ -306,33 +464,40 @@ const handleFileUpload = (file) => {
       label: 'Actions',
       field: 'actions',
       align: 'right',
-      permissions: ['read', 'write', 'invite_member', "checker"],
-    })
+      permissions: ['read', 'write', 'invite_member', 'checker'],
+    });
 
     // Check for empty columns and notify
-    checkEmptyColumns(importedFileColumns.value, json.slice(1))
+    checkEmptyColumns(importedFileColumns.value, json.slice(1));
 
     // Building Table Rows
     importedFileRows.value = excelData.value.slice(1).map((row, index) => {
-      const rowData = {}
+      const rowData = {};
       importedFileColumns.value.forEach((col, colIndex) => {
         // If the value is empty, fill it with an empty string with dashes(" --- ")
-        rowData[col.field] = row[colIndex] || ' --- ' // Replace empty cells with an empty string
+        rowData[col.field] = row[colIndex] || ' --- '; // Replace empty cells with an empty string
 
         // If the column is 'status', set a default value of 'Open'
         if (col.name === 'status') {
-          rowData[col.field] = rowData[col.field] || 'Open'
+          rowData[col.field] = rowData[col.field] || 'Open';
         }
-      })
-      return { id: index, ...rowData }
-    })
-  }
-  reader.readAsArrayBuffer(file)
-}
+      });
+      return { id: index, ...rowData };
+    });
+  };
+  reader.readAsArrayBuffer(file);
+};
+
+const clearFileAndResetTable = () => {
+  existingfile.value = null;
+  importedFileRows.value = [];
+  importedFileColumns.value = [];
+  excelData.value = [];
+};
 
 const dynamicColumns = computed(() =>
-  importedFileColumns.value.filter((col) => col.name !== 'actions')
-)
+  importedFileColumns.value.filter((col) => col.name !== 'actions'),
+);
 
 //On this method, I can trick the table to render the cell as I want
 // @params columnName: string - The name of the column
@@ -340,20 +505,22 @@ const dynamicColumns = computed(() =>
 // @params row: object - The row object
 const renderCell = (columnName, value, row) => {
   // Default
-  return value
-}
+  return value;
+};
 
 const updateColumnLabel = (col, newLabel) => {
-  col.label = newLabel
+  col.label = newLabel;
 
-  const index = importedFileColumns.value.findIndex((c) => c?.name === col?.name)
+  const index = importedFileColumns.value.findIndex(
+    (c) => c?.name === col?.name,
+  );
   if (index !== -1) {
     importedFileColumns.value[index] = {
       ...importedFileColumns.value[index],
       label: newLabel,
-    }
+    };
   }
-}
+};
 
 const addNewRow = () => {
   // Building Table Headers
@@ -363,15 +530,17 @@ const addNewRow = () => {
     label: `col${importedFileColumns.value.length}`,
     field: `col${importedFileColumns.value.length}`,
     align: 'left',
-  })
-}
+  });
+};
 
 const deleteRow = (row) => {
-  importedFileRows.value = importedFileRows.value.filter((r) => r.id !== row.id)
-}
+  importedFileRows.value = importedFileRows.value.filter(
+    (r) => r.id !== row.id,
+  );
+};
 
 const saveReport = async () => {
-  const response = ref(null)
+  const response = ref(null);
   try {
     response.value = await createReport({
       reportname: reportname.value,
@@ -379,25 +548,25 @@ const saveReport = async () => {
       reportdepartment: reportdepartment.value,
       importedFileColumns: importedFileColumns.value,
       importedFileRows: importedFileRows.value,
-    })
+    });
 
     $q.notify({
       color: 'positive',
       message: 'Report created successfully',
       icon: 'check_circle',
-    })
+    });
 
     // Redirecionar após sucesso
-    window.location.href = '#/reports'
+    window.location.href = '#/reports';
   } catch (error) {
-    console.error('Error creating report:', response)
+    console.error('Error creating report:', response);
     $q.notify({
       color: 'negative',
       message: response.value || 'Failed to create Report. Please try again.',
       icon: 'error',
-    })
+    });
   }
-}
+};
 
 const deptSelectOptions = [
   { label: 'All', value: 'All' },
@@ -416,7 +585,7 @@ const deptSelectOptions = [
   { label: 'Sales', value: 'Sales' },
   { label: 'Support', value: 'Support' },
   { label: 'Technology', value: 'Technology' },
-]
+];
 
 const monthSelectOptions = [
   {
@@ -467,53 +636,54 @@ const monthSelectOptions = [
     label: 'December',
     value: 'December',
   },
-]
+];
 
 const statusOptions = [
   { label: 'Open', value: 'Open' },
   { label: 'Closed', value: 'Closed' },
   { label: 'Overdue', value: 'Overdue' },
-]
-const monthOptions = ref(monthSelectOptions)
+];
+const monthOptions = ref(monthSelectOptions);
 const filterFn = (val, update) => {
   if (val === '') {
     update(() => {
-      monthOptions.value = monthSelectOptions
-    })
-    return
+      monthOptions.value = monthSelectOptions;
+    });
+    return;
   }
 
   update(() => {
-    const needle = val.toLowerCase()
+    const needle = val.toLowerCase();
     monthOptions.value = monthSelectOptions.filter((v) =>
       String(v.label || '')
         .toLowerCase()
-        .includes(needle)
-    )
-  })
-}
+        .includes(needle),
+    );
+  });
+};
 
-const departmenthOptions = ref(deptSelectOptions)
+const departmenthOptions = ref(deptSelectOptions);
 const filterDeptFn = (val, update) => {
   if (val === '') {
     update(() => {
-      departmenthOptions.value = deptSelectOptions
-    })
-    return
+      departmenthOptions.value = deptSelectOptions;
+    });
+    return;
   }
 
   update(() => {
-    const needle = val.toLowerCase()
+    const needle = val.toLowerCase();
     departmenthOptions.value = deptSelectOptions.filter((v) =>
       String(v.label || '')
         .toLowerCase()
-        .includes(needle)
-    )
-  })
-}
+        .includes(needle),
+    );
+  });
+};
 
 //Utility function to capitalize the first letter of a string
-const capitalize = (str) => str && str[0].toUpperCase() + str.slice(1).toLowerCase()
+const capitalize = (str) =>
+  str && str[0].toUpperCase() + str.slice(1).toLowerCase();
 </script>
 
 <style lang="sass" scoped>
