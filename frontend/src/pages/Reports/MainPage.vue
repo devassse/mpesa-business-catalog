@@ -2,8 +2,17 @@
   <div class="bg-dark">
     <q-card class="bg-dark q-pt-lg" style="border: 0" flat>
       <div class="image-avatar-1 bg-secondary" style="border-radius: 100%">
-        <img :src="images.business" class="appearBox"
-          style="position: absolute; object-position: fit; height: 90%; width: 90%; right: 5px" />
+        <img
+          :src="images.business"
+          class="appearBox"
+          style="
+            position: absolute;
+            object-position: fit;
+            height: 90%;
+            width: 90%;
+            right: 5px;
+          "
+        />
       </div>
 
       <q-card-section class="text-center q-pt-sm text-white appearBox">
@@ -12,13 +21,38 @@
     </q-card>
   </div>
   <!-- The Table -->
-  <q-table title="Reports" dense flat bordered square :rows="rows" :columns="columns" row-key="reportname"
-    selection="single" :filter="filter" :loading="loadingReports" :rows-per-page-options="[15]">
+  <q-table
+    title="Reports"
+    dense
+    flat
+    bordered
+    square
+    :rows="rows"
+    :columns="columns"
+    row-key="reportname"
+    selection="single"
+    :filter="filter"
+    :loading="loadingReports"
+    :rows-per-page-options="[15]"
+  >
     <template v-slot:top>
-      <q-btn color="secondary" label="Create new Report" no-caps icon="add_chart" to="/reports/createreport"
-        :disable="!isAdmin" />
+      <q-btn
+        color="secondary"
+        label="Create new Report"
+        no-caps
+        icon="add_chart"
+        to="/reports/createreport"
+        :disable="!isAdmin"
+      />
       <q-space />
-      <q-input dense debounce="300" color="secondary" label="Search Reports" v-model="filter" style="width: 300px">
+      <q-input
+        dense
+        debounce="300"
+        color="secondary"
+        label="Search Reports"
+        v-model="filter"
+        style="width: 300px"
+      >
         <template v-slot:append>
           <q-icon name="search" />
         </template>
@@ -28,33 +62,65 @@
     <template v-slot:body="props">
       <q-tr :props="props">
         <q-td auto-width>
-          <q-toggle :disable="!isAdmin" color="secondary" checked-icon="add" unchecked-icon="remove"
+          <q-toggle
+            :disable="!isAdmin"
+            color="secondary"
+            checked-icon="add"
+            unchecked-icon="remove"
             :model-value="expandedRow === props.row.id"
-            @update:model-value="(checked) => checkReportRow(props.row, checked)" />
+            @update:model-value="
+              (checked) => checkReportRow(props.row, checked)
+            "
+          />
         </q-td>
 
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
           {{ col.value }}
           <div v-if="col.name === 'actions'">
             <!-- If is Only Viewer -->
-            <q-btn flat round size="sm" icon="visibility" color="secondary" class="q-mr-xs" :to="{
-              name: 'ReportMaintenanceView',
-              params: { id: props.row.id },
-            }" v-if="canEdit()">
+            <q-btn
+              flat
+              round
+              size="sm"
+              icon="visibility"
+              color="secondary"
+              class="q-mr-xs"
+              :to="{
+                name: 'ReportMaintenanceView',
+                params: { id: props.row.id },
+              }"
+              v-if="canEdit()"
+            >
               <q-tooltip>View Report</q-tooltip>
             </q-btn>
 
             <!-- If is Admin or Editor -->
-            <q-btn flat round size="sm" icon="edit" color="secondary" class="q-mr-xs" :to="{
-              name: 'ReportMaintenanceView',
-              params: { id: props.row.id },
-            }" v-if="isEditor || isAdmin">
+            <q-btn
+              flat
+              round
+              size="sm"
+              icon="edit"
+              color="secondary"
+              class="q-mr-xs"
+              :to="{
+                name: 'ReportMaintenanceView',
+                params: { id: props.row.id },
+              }"
+              v-if="isEditor || isAdmin"
+            >
               <q-tooltip>Edit Report</q-tooltip>
             </q-btn>
 
             <!-- If is Only Admin -->
-            <q-btn flat round size="sm" icon="delete" color="negative" @click="deleteReportTrigger(props.row)"
-              :disable="!isAdmin">
+            <q-btn
+              flat
+              round
+              size="sm"
+              icon="delete"
+              color="negative"
+              @click="deleteReportTrigger(props.row)"
+              :disable="!isAdmin"
+            >
               <q-tooltip>Delete Report</q-tooltip>
             </q-btn>
           </div>
@@ -68,27 +134,41 @@
             </h6>
             <!-- This is expand slot for row above: {{ props.row.reportname }}. -->
             <div class="row" style="border-top: 1px solid #ccc">
-              <div class="col-4" style="
+              <div
+                class="col-4"
+                style="
                   display: flex;
                   flex-direction: column;
                   border-right: 1px solid #ccc;
                   padding-top: 5px;
-                ">
+                "
+              >
                 <span>All Groups</span>
-                <q-checkbox v-for="group in allGroups" v-model="group.isSelected" :key="group.name" :label="group.name"
-                  color="secondary" />
+                <q-checkbox
+                  v-for="group in allGroups"
+                  v-model="group.isSelected"
+                  :key="group.name"
+                  :label="group.name"
+                  color="secondary"
+                />
 
-                <q-btn label="Update" color="secondary" @click="updateReportsGroups(props.row)"
-                  :disable="allGroups.length === 0"></q-btn>
+                <q-btn
+                  label="Update"
+                  color="secondary"
+                  @click="updateReportsGroups(props.row)"
+                  :disable="allGroups.length === 0"
+                ></q-btn>
               </div>
-              <div class="col-8" style="
+              <div
+                class="col-8"
+                style="
                   display: flex;
                   justify-content: space-between;
                   flex-direction: column;
                   padding-top: 5px;
                   padding-left: 10px;
-                ">
-              </div>
+                "
+              ></div>
             </div>
           </div>
         </q-td>
@@ -113,43 +193,48 @@
 
       <q-card-actions align="right">
         <q-btn flat label="Close" color="negative" v-close-popup />
-        <q-btn flat label="Delete" color="secondary" @click="confirmDeleteReport" />
+        <q-btn
+          flat
+          label="Delete"
+          color="secondary"
+          @click="confirmDeleteReport"
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>
   <!--/ Confirm Delete Report Dialog -->
 </template>
 <script setup>
-import { onMounted, ref } from 'vue'
-import images from 'src/boot/images'
-import { getAllReports, deleteReport } from 'src/boot/reports'
-import { updateReportGroups } from 'src/boot/reports'
-import { getAllGroups } from 'boot/roles'
-import Cookies from 'js-cookie'
-import { useQuasar } from 'quasar'
+import { onMounted, ref } from 'vue';
+import images from 'src/boot/images';
+import { getAllReports, deleteReport } from 'src/boot/reports';
+import { updateReportGroups } from 'src/boot/reports';
+import { getAllGroups } from 'boot/roles';
+import Cookies from 'js-cookie';
+import { useQuasar } from 'quasar';
 
-const $q = useQuasar()
-const loadingReports = ref(false)
-const filter = ref('')
+const $q = useQuasar();
+const loadingReports = ref(false);
+const filter = ref('');
 
-const expandedRow = ref(null)
+const expandedRow = ref(null);
 
-const isElectron = ref(false)
-const isAdmin = ref(false)
-const isEditor = ref(false)
-const isViewer = ref(false)
-const isAuditor = ref(false)
+const isElectron = ref(false);
+const isAdmin = ref(false);
+const isEditor = ref(false);
+const isViewer = ref(false);
+const isAuditor = ref(false);
 
-const reportName = ref('')
-const reportId = ref('')
-const isDeleteReport = ref(false)
+const reportName = ref('');
+const reportId = ref('');
+const isDeleteReport = ref(false);
 
-const allGroups = ref([])
-const selectedReportGroups = ref({})
-const selectedRoles = ref(false)
-const loggedInUser = ref({})
+const allGroups = ref([]);
+const selectedReportGroups = ref({});
+const selectedRoles = ref(false);
+const loggedInUser = ref({});
 
-const communsRows = ref([])
+const communsRows = ref([]);
 const columns = [
   {
     name: 'reportname',
@@ -195,7 +280,7 @@ const columns = [
     field: 'actions',
     align: 'right',
   },
-]
+];
 
 const rows = ref([
   {
@@ -206,16 +291,16 @@ const rows = ref([
     createdat: '',
     lastmodified: '',
   },
-])
+]);
 
 const deleteReportTrigger = (row) => {
   // Confirms the Name of the report to be deleted
-  reportName.value = row?.reportname
-  reportId.value = row?.id
+  reportName.value = row?.reportname;
+  reportId.value = row?.id;
 
   // Opens the delete confirmation dialog
-  isDeleteReport.value = true
-}
+  isDeleteReport.value = true;
+};
 
 const confirmDeleteReport = () => {
   deleteReport(reportId.value)
@@ -225,54 +310,54 @@ const confirmDeleteReport = () => {
           color: 'positive',
           message: 'Report deleted successfully',
           icon: 'check_circle',
-        })
+        });
         // Fetch all reports again to update the table
-        fetchAllReports()
+        fetchAllReports();
       } else {
         $q.notify({
           color: 'negative',
           message: 'Failed to delete Report. Please try again.',
           icon: 'error',
-        })
-        fetchAllReports()
+        });
+        fetchAllReports();
       }
     })
     .catch((error) => {
-      console.error('Error deleting report:', error)
-    })
+      console.error('Error deleting report:', error);
+    });
 
-  isDeleteReport.value = false
+  isDeleteReport.value = false;
   // Implement the delete logic here
-}
+};
 
 const formatDate = (isoString) => {
-  const date = new Date(isoString)
-  const day = String(date.getUTCDate()).padStart(2, '0')
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-  const year = date.getUTCFullYear()
-  return `${day}/${month}/${year}`
-}
+  const date = new Date(isoString);
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 const getCookie = async (name) => {
   if (isElectron.value) {
-    return await window.electronAPI.getCookie(name)
+    return await window.electronAPI.getCookie(name);
   } else {
-    return Cookies.get(name)
+    return Cookies.get(name);
   }
-}
+};
 
 const initializeCookieValues = async () => {
-  isAdmin.value = (await getCookie('isAdmin')) === 'true'
-  isAuditor.value = (await getCookie('isAuditor')) === 'true'
-  isEditor.value = (await getCookie('isEditor')) === 'true'
-  isViewer.value = (await getCookie('isViewer')) === 'true'
-}
+  isAdmin.value = (await getCookie('isAdmin')) === 'true';
+  isAuditor.value = (await getCookie('isAuditor')) === 'true';
+  isEditor.value = (await getCookie('isEditor')) === 'true';
+  isViewer.value = (await getCookie('isViewer')) === 'true';
+};
 
 const fetchAllReports = () => {
-  loadingReports.value = true
+  loadingReports.value = true;
   getAllReports()
     .then((response) => {
-      communsRows.value = response.reports
+      communsRows.value = response.reports;
 
       rows.value = communsRows.value.map((row) => {
         return {
@@ -282,8 +367,8 @@ const fetchAllReports = () => {
           owner: row?.reportDepartment?.toString() || ' --- ',
           createdat: formatDate(row?.createdAt) || ' --- ',
           lastmodified: formatDate(row?.updatedAt) || ' --- ',
-        }
-      })
+        };
+      });
 
       //If user is Admin, show all reports
       if (!isAdmin.value) {
@@ -296,20 +381,20 @@ const fetchAllReports = () => {
         //   return true // If no department, show all rows
         // })
       }
-      loadingReports.value = false
+      loadingReports.value = false;
     })
     .catch((error) => {
-      console.error(error)
-      loadingReports.value = false
-    })
-}
+      console.error(error);
+      loadingReports.value = false;
+    });
+};
 
 const fetchAllGroups = async () => {
-  allGroups.value = await getAllGroups()
-}
+  allGroups.value = await getAllGroups();
+};
 
 const updateReportsGroups = (report) => {
-  selectedReportGroups.value = []
+  selectedReportGroups.value = [];
 
   // groups.value.forEach((group) => {
   //   if (group.isSelected) {
@@ -328,73 +413,73 @@ const updateReportsGroups = (report) => {
   // })
 
   allGroups.value.forEach((group) => {
-    const idx = selectedReportGroups.value.indexOf(group._id)
+    const idx = selectedReportGroups.value.indexOf(group._id);
 
     if (group.isSelected) {
       if (idx === -1) {
-        selectedReportGroups.value.push(group._id)
+        selectedReportGroups.value.push(group._id);
       }
     } else {
       if (idx !== -1) {
-        selectedReportGroups.value.splice(idx, 1)
+        selectedReportGroups.value.splice(idx, 1);
       }
     }
-  })
+  });
 
   const groups = {
     groups: (selectedReportGroups.value = selectedReportGroups.value.filter(
-      (group) => group !== undefined && group !== null
+      (group) => group !== undefined && group !== null,
     )),
-  }
+  };
 
   updateReportGroups(report.id, groups)
     .then((response) => {
-      console.log('Update Report Groups Response:', response)
+      console.log('Update Report Groups Response:', response);
 
       $q.notify({
         color: 'positive',
         message: 'Report updated successfully',
         icon: 'check_circle',
-      })
+      });
     })
     .catch((error) => {
       $q.notify({
         color: 'negative',
         message: 'Failed to update Report. Please try again.',
         icon: 'error',
-      })
-      console.error(error)
-    })
+      });
+      console.error(error);
+    });
 
-  selectedReportGroups.value = []
-}
+  selectedReportGroups.value = [];
+};
 
 const checkReportRow = async (row, checked) => {
   // expandedRow.value = expandedRow.value === row.id ? null : row.id
   if (checked) {
-    expandedRow.value = row.id // abre a nova linha
+    expandedRow.value = row.id; // abre a nova linha
   } else {
-    expandedRow.value = null // se clicar na mesma, fecha
+    expandedRow.value = null; // se clicar na mesma, fecha
   }
 
-  const singleReport = communsRows.value.find((item) => item._id === row.id)
+  const singleReport = communsRows.value.find((item) => item._id === row.id);
   if (singleReport) {
     // Check if the report has groups and set the isSelected property accordingly
     allGroups.value.forEach((group) => {
-      group.isSelected = singleReport.groups.includes(group._id)
-    })
+      group.isSelected = singleReport.groups.includes(group._id);
+    });
   } else {
     // If no report found, reset all groups to not selected
     allGroups.value.forEach((group) => {
-      group.isSelected = false
-    })
+      group.isSelected = false;
+    });
   }
 
-  selectedReportGroups.value = []
+  selectedReportGroups.value = [];
 
   // Fetch all groups to ensure the UI is updated
-  fetchAllReports()
-}
+  fetchAllReports();
+};
 
 const canView = () => {
   // se for viewer e editor, retorna true:
@@ -405,7 +490,7 @@ const canView = () => {
   } else if (!isViewer.value && isEditor.value) {
     return false;
   }
-}
+};
 
 // If the user is only viewer, they can edit the report
 const canEdit = () => {
@@ -414,19 +499,18 @@ const canEdit = () => {
   } else if (isViewer.value && !isEditor.value) {
     return true;
   }
-}
+};
 
 onMounted(async () => {
   //Get information about the current user on session storage
-  loggedInUser.value = JSON.parse(sessionStorage.getItem('currentUser'))
+  loggedInUser.value = JSON.parse(sessionStorage.getItem('currentUser'));
 
-  await initializeCookieValues()
-  fetchAllReports()
-  await fetchAllGroups()
+  await initializeCookieValues();
+  fetchAllReports();
+  await fetchAllGroups();
 
-  console.log("Can Edit:", canEdit());
-
-})
+  console.log('Can Edit:', canEdit());
+});
 </script>
 <style lang="scss">
 .image-avatar-1 {

@@ -21,7 +21,7 @@
   </q-list>
   <!-- End Filters -->
   <!-- Report Table -->
-  <q-table flat square :rows="rows" :columns="columns" row-key="id" bordered virtual-scroll
+  <q-table flat square :rows="rows" :columns="columns" row-key="id" bordered virtual-scroll @row-click="onRowClick"
     :rows-per-page-options="[15, 25, 0]" class="sticky-header-table" :loading="loadingReportRows" :filter="filter">
     <!-- Search -->
     <template v-slot:top-right>
@@ -117,6 +117,8 @@ const hasWrite = ref([]);
 const isWriteOnly = ref(false);
 const hasInviteOrShare = ref([])
 const canInviteOrShare = ref(false);
+
+const lastClickTime = ref(0)
 
 const getCookie = async (name) => {
   if (isElectron.value) {
@@ -397,6 +399,33 @@ const getReportsGroupsById = async (groupsIds) => {
   console.log('canInviteOrShare:', canInviteOrShare.value);
 };
 
+const onRowClick = (props) => {
+  const currentTime = Date.now();
+  const timeSinceLastClick = currentTime - lastClickTime.value;
+
+
+
+  if (timeSinceLastClick < 300) {
+    // duplicateRow(props.row);
+    console.log('Duplication triggered for row:', props);
+
+  } else {
+    lastClickTime.value = currentTime;
+    console.log('Row clicked:', props);
+  }
+}
+
+const duplicateRow = (row) => {
+  const newRow = { ...row }
+  rows.value.push(newRow)
+
+  $q.notify({
+    color: 'positive',
+    message: 'Row duplicated successfully!',
+    icon: 'check_circle',
+  })
+}
+
 onMounted(async () => {
   reportId.value = route.params.id
   await fetchReportData()
@@ -424,6 +453,14 @@ const deptSelectOptions = [
   { label: 'Technology', value: 'Technology' },
 ]
 
+const formatLongText = (text) => {
+  const words = text.split(' ');
+  const first = words.slice(0, 400).join(' ');
+  const rest = words.slice(400).join(' ');
+
+  return `<span>${first}</span> <span style="word-spacing: 0.5em">${rest}</span>`;
+}
+
 defineExpose({
   addNewRow,
   saveUpdateReport,
@@ -440,9 +477,11 @@ defineExpose({
     color: #fff !important
     opacity: 1 !important
 
+// Columns minimum width 500px
+
 .q-table tbody td
   max-width: 500px !important;
-  white-space: normal !important;
+  overflow-x: hidden
 
   .q-table__top,
   .q-table__bottom,
