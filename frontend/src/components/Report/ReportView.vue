@@ -36,7 +36,7 @@ const rows = ref([])
 const filter = ref('')
 const loadingReportRows = ref(false)
 
-const emit = defineEmits(['reportNameToParent'])
+const emit = defineEmits(['reportDataToParent'])
 
 const removerLinha = (row) => {
   rows.value = rows.value.filter((r) => r.id !== row.id)
@@ -63,7 +63,7 @@ onMounted(async () => {
         name: reportName.value,
         month: reportMonth.value,
       }
-      emit('reportNameToParent', payload)
+      emit('reportDataToParent', payload)
     })
     .catch((error) => {
       console.error(error)

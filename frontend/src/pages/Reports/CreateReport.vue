@@ -115,7 +115,7 @@
           </template>
           <template v-slot:append>
             <q-btn
-            v-if="existingfile"
+              v-if="existingfile"
               flat
               dense
               icon="cancel"
