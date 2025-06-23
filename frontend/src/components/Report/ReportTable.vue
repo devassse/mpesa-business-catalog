@@ -411,12 +411,11 @@ const exportToExcel = () => {
     return newRow;
   });
   const plainRows = filteredRows.value;
-  // const plainRows = rows.value.map((row) => ({ ...row }))
 
   const worksheet = XLSX.utils.json_to_sheet(plainRows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Dados');
-  XLSX.writeFile(workbook, 'report.xlsx');
+  XLSX.writeFile(workbook, 'Tracker.xlsx');
 };
 
 // Check if the columns have a "Date" column and disable it
