@@ -5,13 +5,22 @@
       dense
       dense-toggle
       expand-separator
-      icon="search"
-      label="Filters"
     >
+    <template v-slot:header>
+      <div class="row items-center justify-between full-width q-px-sm">
+        <div>
+          <q-icon name="search" size="xs" />
+          <span class="text-subtitle2 q-ml-sm">Filters</span>
+        </div>
+        <div class="q-gutter-sm">
+          <q-btn flat icon="backspace" color="negative" size="sm" @click.stop="clearFilters" />
+        </div>
+      </div>
+    </template>
       <q-card>
         <q-card-section>
           <div class="row q-col-gutter-md">
-            <div class="col-3" v-for="col in columns" :key="col.name">
+            <div class="col-3" v-for="col in filteredColumns" :key="col.name">
               <q-select
                 flat
                 dense
@@ -22,13 +31,13 @@
                 option-label="label"
                 option-value="value"
                 :label="col?.label"
-                @update:model-value="filterRowsByDepartment"
+                @update:model-value="filterRowsByColumn"
               >
                 <template v-if="col?.filter" v-slot:append>
                   <q-icon
                     name="cancel"
-                    @click.stop.prevent="col.filter = ''"
                     class="cursor-pointer"
+                    @click.stop.prevent="col.filter = ''; clearEachFilter()"
                   />
                 </template>
               </q-select>
@@ -172,7 +181,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { getSingleReportById, updateReport } from 'src/boot/reports';
 import { getGroupById } from 'src/boot/roles';
 import { useRoute } from 'vue-router';
@@ -188,6 +197,8 @@ const reportMonth = ref('');
 
 const columns = ref([]);
 const rows = ref([]);
+const filteredColumns = ref([])
+const filteredRows = ref([])
 
 const filter = ref('');
 const filterByDepartment = ref('');
@@ -392,18 +403,14 @@ const formatDisplay = (value, type) => {
 
 // Export to Excel
 const exportToExcel = () => {
-  //Filter 'Actions' column from rows and Remove it
-  const filteredColumns = columns.value.filter(
-    (col) => col?.name !== 'actions',
-  );
-  const filteredRows = rows.value.map((row) => {
+  filteredRows.value = rows.value.map((row) => {
     const newRow = {};
-    filteredColumns.forEach((col) => {
+    filteredColumns.value.forEach((col) => {
       newRow[col?.name] = row[col?.name];
     });
     return newRow;
   });
-  const plainRows = filteredRows;
+  const plainRows = filteredRows.value;
   // const plainRows = rows.value.map((row) => ({ ...row }))
 
   const worksheet = XLSX.utils.json_to_sheet(plainRows);
@@ -422,26 +429,31 @@ const hasDateColumn = (columns) => {
   });
 };
 
-const filterRowsByDepartment = async () => {
-  if (!filterByDepartment.value) {
-    rows.value = rows.value; // Reset to original rows if no filter
-    return;
-  }
+const filterRowsByColumn = async () => {
+  filteredRows.value = ref([...rows.value])
 
-  const filteredRows = rows.value.filter((row) => {
-    return row?.department === filterByDepartment.value;
-  });
-
-  rows.value = filteredRows;
-  loadingReportRows.value = false;
+  rows.value = rows.value.filter(row => {
+    return filteredColumns.value.every(col => {
+      return !col.filter || row[col.field] === col.filter
+    })
+  })
 };
 
-const clearDepartmentFilter = async () => {
-  filterByDepartment.value = '';
-  rows.value = rows.value;
+const clearFilters = async () => {
+  filteredRows.value = [];
 
   await fetchReportData();
 };
+
+const clearEachFilter = async () => {
+  filteredRows.value = [];
+  filteredColumns.value = [];
+  filteredColumns.value = columns.value.map((col) => ({
+    ...col,
+    filter: null,
+  }));
+  await fetchReportData();
+}
 
 const fetchReportData = async () => {
   loadingReportRows.value = true;
@@ -458,6 +470,11 @@ const fetchReportData = async () => {
         align: 'left',
         ...col,
       }));
+
+      //Filter 'Actions' column from rows and Remove it
+      filteredColumns.value = columns.value.filter(
+        (col) => col?.name !== 'actions',
+      );
 
       // Emit the report name to the parent component
       const payload = {
@@ -551,6 +568,13 @@ onMounted(async () => {
   // Initialize cookie values
   await initializeCookieValues();
 });
+
+watch(rows, () => {
+  filteredColumns.value.forEach(col => {
+    const uniqueValues = [...new Set(rows.value.map(row => row[col.field]))]
+    col.options = uniqueValues.map(v => ({ label: String(v), value: v }))
+  })
+}, { immediate: true })
 
 const deptSelectOptions = [
   { label: 'All', value: 'All' },
