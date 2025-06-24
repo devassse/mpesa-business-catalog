@@ -83,7 +83,23 @@
         <!-- This Code Below is used 3 lines below to Validate if a Logged User Can Update Information -->
         <!-- v-if="isWriteOnly || canInviteOrShare || isEditor || isAdmin" -- This code here is only to Give any IDEIA, the original is used below -->
         <template v-if="props.col.name !== 'actions'">
-          {{ formatDisplay(props.value, getFieldType(props.col.name)) }}
+          <span v-if="getFieldType(props.col.name) === 'date'">
+            <!-- if Date is grater than today, then show the date in red -->
+             <q-chip dense color="positive" class="text-white" v-if="new Date(props.value) < new Date()">
+              {{ formatDisplay(props.value, getFieldType(props.col.name)) }}
+             </q-chip>
+             <!-- If Date is about 30 days to today, then show the date in yellow -->
+              <q-chip dense color="warning" class="text-white" v-else-if="new Date(props.value) >= new Date(new Date().setDate(new Date().getDate() - 30))">
+                {{ formatDisplay(props.value, getFieldType(props.col.name)) }}
+              </q-chip>
+             <!-- if Date is less than today, then show the date in green -->
+              <q-chip dense color="negative" class="text-white" v-else>
+                {{ formatDisplay(props.value, getFieldType(props.col.name)) }}
+              </q-chip>
+          </span>
+          <span v-else>
+            {{ formatDisplay(props.value, getFieldType(props.col.name)) }}
+          </span>
           <q-tooltip max-width="50%" anchor="center middle" self="top middle">
             {{ formatDisplay(props.value, getFieldType(props.col.name)) }}
           </q-tooltip>
@@ -93,7 +109,7 @@
             v-slot="scope"
             v-if="isWriteOnly || canInviteOrShare || isEditor || isAdmin"
           >
-            <template v-if="getFieldType(props.col.name) === 'date'">
+            <template v-if="getFieldType(props.col.name) === 'date' || getFieldType(props.col.name) === 'data'">
               <q-date
                 v-model="scope.value"
                 mask="DD/MM/YYYY"
