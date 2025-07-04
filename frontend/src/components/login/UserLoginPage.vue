@@ -41,6 +41,7 @@ import Cookies from 'js-cookie'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 import { login } from 'src/boot/auth'
+import { getCurrentUser } from 'boot/auth';
 
 const emit = defineEmits(['sign-up-tab'])
 
@@ -88,7 +89,21 @@ const onSubmit = async () => {
 
     // Set the token in a cookie
     await setCookie('authToken', response.token, 0, 60 * 4) // Expires in 180 minutes
-    router.push('/')
+
+    //Get Current User
+    const userData = await getCurrentUser(response.token)
+
+    // If is First Login, redirect to change password
+    if (userData.firstLogin) {
+      router.push('/change-password')
+      loggingIn.value = false
+
+      Cookies.remove(name);
+      return
+    }else{
+      // Else redirect to home
+      router.push('/')
+    }
 
     loggingIn.value = false
 
@@ -111,6 +126,7 @@ const onSubmit = async () => {
     })
   }
 }
+
 </script>
 
 <style scoped>

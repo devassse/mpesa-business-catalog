@@ -4,18 +4,28 @@
       <q-card-section horizontal>
         <q-card-section class="q-pa-none q-pt-md" style="min-width: 54%">
           <q-tabs v-model="tab" align="justify" narrow-indicator class="q-mb-lg">
-            <q-tab class="text-dark q-ml-md" name="resetpassword" label="Reset Password" />
+            <q-tab class="text-dark q-ml-md" name="changepassword" label="Change Password" />
           </q-tabs>
           <q-tab-panels v-model="tab" animated transition-prev="scale" transition-next="scale"
             class="text-dark text-center q-pa-none">
-            <q-tab-panel name="resetpassword">
-              <div class="text-h6 q-mt-xl">Reset Password <br /> M-Pesa Business Catalog</div>
+            <q-tab-panel name="changepassword">
+              <div class="text-h6 q-mt-xl">Change Password <br /> M-Pesa Business Catalog</div>
               <div class="text-caption q-pb-lg">It Makes working fun!</div>
               <q-form style="width: 100%" @submit="onSubmit" class="q-gutter-md">
 
+                <q-input filled dense :type="isCurrentPwd ? 'password' : 'text'" v-model="currentpassword" label="Current Password"
+                  hint="Your current password" lazy-rules :rules="[
+                    (val) => (val && val.length > 0) || 'Please enter your current password',
+                    (val) => val.length >= 8 || 'Password must be at least 8 characters long',
+                  ]">
+                  <template v-slot:append>
+                    <q-icon size="20px" :name="isCurrentPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer"
+                      @click="isCurrentPwd = !isCurrentPwd" />
+                  </template>
+                </q-input>
 
-                <q-input filled dense :type="isPwd ? 'password' : 'text'" v-model="password" label="New Password"
-                  hint="Your passowrd" lazy-rules :rules="[
+                <q-input filled dense :type="isPwd ? 'password' : 'text'" v-model="newpassword" label="New Password"
+                  hint="Your password" lazy-rules :rules="[
                     (val) => (val && val.length > 0) || 'Please enter your password',
                     (val) => val.length >= 8 || 'Password must be at least 8 characters long',
                   ]">
@@ -24,10 +34,11 @@
                       @click="isPwd = !isPwd" />
                   </template>
                 </q-input>
+
                 <q-input filled dense :type="isRePwd ? 'password' : 'text'" v-model="repassword"
                   label="Confirm New Password" hint="Confirm passowrd" lazy-rules :rules="[
                     (val) => (val && val.length > 0) || 'Please confirm your password',
-                    (val) => val === password || 'Passwords do not match',
+                    (val) => val === newpassword || 'Passwords do not match',
                   ]">
                   <template v-slot:append>
                     <q-icon size="20px" :name="isRePwd ? 'visibility_off' : 'visibility'" class="cursor-pointer"
@@ -38,7 +49,7 @@
 
                 <div class="q-mt-xl">
                   <q-btn label="Cancel" @click="backToLogin" color="negative" />
-                  <q-btn label="Submit" :loading="resettingPassword" unelevated type="submit" color="secondary"
+                  <q-btn label="Submit" :loading="changingPassword" unelevated type="submit" color="secondary"
                     class="q-ml-sm" />
                 </div>
               </q-form>
@@ -61,23 +72,28 @@ import { ref } from 'vue'
 import loginImage from 'src/assets/login.webp'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { resetPassword } from 'src/boot/auth'
+import { changePassword, getCurrentUser } from 'src/boot/auth'
 
 const router = useRouter()
 const $q = useQuasar()
 
-const tab = ref('resetpassword')
-const resettingPassword = ref(false)
+const tab = ref('changepassword')
+const changingPassword = ref(false)
 
-const password = ref(null)
+const currentpassword = ref(null)
+const newpassword = ref(null)
 const repassword = ref(null)
+const isCurrentPwd = ref(true)
 const isPwd = ref(true)
 const isRePwd = ref(true)
 
 const onSubmit = async () => {
   try {
-    resettingPassword.value = true
-    const token = router.currentRoute.value.query.token
+    changingPassword.value = true
+
+    // Token from Session Storage
+    const token = sessionStorage.getItem('token')
+
     if (!token) {
       $q.notify({
         type: 'negative',
@@ -89,40 +105,40 @@ const onSubmit = async () => {
       return
     }
 
-    const response = await resetPassword({ password: password.value, token: token })
+    // Send the change password request
+    const response = await changePassword({ newpassword: newpassword.value, currentpassword: currentpassword.value, token: token })
+
     if (response) {
       // Show success notification
       $q.notify({
         type: 'positive',
-        message: 'Password Reset Success.',
+        message: 'Password changed successfully.',
         position: 'top',
         timeout: 3000,
       })
-
       // Redirect to login page
       router.push('/login')
     } else {
       // Show error notification
       $q.notify({
         type: 'negative',
-        message: `Error resetting password: ${response.error || 'Unknown error'}`,
+        message: `Error changing password: ${response.data.error || 'Unknown error'}`,
         position: 'top',
         timeout: 3000,
       })
     }
+
   } catch (error) {
-    resettingPassword.value = false
-    console.log('Error during password reset:', error);
-    // Show error notification
+    changingPassword.value = false
+    console.log('Error changing password:', error);
+  //   // Show error notification
     $q.notify({
       type: 'negative',
       message: `Error resetting password: ${error?.response?.data?.error || 'Unknown error'}`,
       position: 'top',
       timeout: 3000,
     })
-
   }
-
 }
 
 const backToLogin = () => {

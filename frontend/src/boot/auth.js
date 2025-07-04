@@ -85,6 +85,9 @@ const login = async ({ email, password }) => {
       }
     }));
 
+    // Save token in session storage
+    sessionStorage.setItem('token', response.data.token);
+
     return response.data;
   } catch (error) {
     console.error('Error during login:', error.response ? error.response.data : error.message);
@@ -126,10 +129,20 @@ const resetPassword = async (params) => {
   }
 }
 
+const changePassword = async (params) => {
+  try {
+    const response = await apiClient.post('/auth/change-password', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error during password reset:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+}
+
 import { boot } from 'quasar/wrappers';
 
 export default boot(({ app }) => {
-  app.config.globalProperties.$auth = { signup, login, getCurrentUser, forgotPassword, resetPassword };
+  app.config.globalProperties.$auth = { signup, login, getCurrentUser, forgotPassword, resetPassword, changePassword };
 });
 
-export { signup, login, getCurrentUser, forgotPassword, resetPassword };
+export { signup, login, getCurrentUser, forgotPassword, resetPassword, changePassword };

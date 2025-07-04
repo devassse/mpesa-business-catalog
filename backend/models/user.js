@@ -46,6 +46,18 @@ const userSchema = new mongoose.Schema(
         ref: "Group",
       },
     ],
+    firstLogin: {
+      type: Boolean,
+      default: true, // Indicates if it's the user's first login
+    },
+    lastPasswordChange: {
+      type: Date,
+      default: Date.now, // Stores the date of the last password change
+    },
+    lastLogin: {
+      type: Date,
+      default: Date.now, // Stores the date of the last login
+    }  
   },
   {
     timestamps: true, // Adds createdAt and updatedAt timestamps
@@ -208,6 +220,8 @@ userSchema.statics.loginLocal = async function (email, password) {
 
   // Find the user in your database
   const user = await this.findOne({ email });
+  // const user = await this.findOne({ email }).select('-password');
+
   if (!user) {
     throw Error("Incorrect email");
   }
@@ -235,11 +249,15 @@ userSchema.statics.loginLocal = async function (email, password) {
     // return res.status(400).json({ message: 'Password incorreta' }) This is not working, we don't have access to the res object here
   }
 
+  // Remove password from the user object before returning
+  const userObj = user.toObject(); // Convert Mongoose document to plain object
+  delete userObj?.password;
+
   return {
     status: 200,
     success: true,
     message: "Login Successful",
-    data: user, // cuidado com os dados sensíveis
+    data: userObj,
   };
 };
 
@@ -269,7 +287,11 @@ userSchema.statics.resetUserPassword = async function (password, token) {
   user.password = hashedPassword;
   await user.save();
 
+  //Remove password from the user object before returning
+  delete user?.password;
+
   console.log("User password reset successfully", user);
+
 
   return user;
 };

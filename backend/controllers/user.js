@@ -88,13 +88,11 @@ const forgotPassword = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    console.log("User found: ", user);
     // Generate a reset password link
     const resetLink = `${
       process.env.FRONTEND_URL
     }/reset-password?token=${createToken(user._id)}`;
 
-    console.log("Reset link: ", resetLink);
     // Send the reset password link via email
     const sentEmail = await sendResetPasswordEmail(user.email, resetLink);
     console.log("Email sent: ", sentEmail);
@@ -128,4 +126,51 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, forgotPassword, resetPassword };
+// change password
+const changePassword = async (req, res) => {
+
+  const { currentpassword, newpassword, token } = req.body.params;
+  
+  // Decode the token to get the user ID
+  if (!token) {
+    return res.status(401).json({ error: "Authentication token is required" });
+  }
+
+  try {
+    // Decode the JWT token to get user ID
+    const decoded = jwt.decode(token);
+
+    // Find the user by their ID
+    const user = await User.findById(decoded._id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Compare the current password with the stored password
+    const isMatch = await bcrypt.compare(currentpassword, user?.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    // Hash
+    const salt = await bcrypt.genSalt(10);
+    const hashedNewPassword = await bcrypt.hash(newpassword, salt);
+
+    // Update the user's password
+    user.password = hashedNewPassword;
+    // Set firstLogin to false if the password is changed
+    user.firstLogin = false; 
+    // Update the last password change date
+    user.lastPasswordChange = new Date(); 
+
+    await user.save();
+    res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+module.exports = { signup, login, forgotPassword, resetPassword, changePassword };
